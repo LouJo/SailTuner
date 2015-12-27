@@ -16,20 +16,23 @@ ApplicationWindow {
 	property QtObject tuner
 
 	initialPage: Component {
-		ApplicationWindow {
+		Page {
+			id: page
+			allowedOrientations: Orientation.All
+
+			SilicaFlickable {
+				anchors.fill: parent
+
+				SimpleDisplay {
+					theme: Theme
+					tuner: app.tuner
+				}
+
+			}
+
 			Tuner {
 				id: tunerObject
 				running: Qt.application.active && app.userRunning
-			}
-
-			property QtObject tuner: tunerObject
-
-			Text {
-				anchors.horizontalCenter: parent.horizontalCenter
-				anchors.verticalCenter: parent.verticalCenter
-				text: tuner.freq.toFixed(2) + " Hz"
-				font.pixelSize: 90
-				color: Theme.primaryColor
 			}
 
 			Component.onCompleted: {
@@ -41,10 +44,9 @@ ApplicationWindow {
 
 	cover: Component {
 		CoverBackground {
-			Text {
-				color: Theme.primaryColor
-				font.pixelSize: 40
-				text: app.tuner.freq.toFixed(2) + " Hz"
+			SimpleDisplay {
+				theme: Theme
+				tuner: app.tuner
 			}
 		}
 	}

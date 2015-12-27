@@ -1,5 +1,7 @@
 <!DOCTYPE RCC><RCC version="1.0">
 <qresource prefix="/qml/">
 <file>Desktop.qml</file>
+<file>SimpleDisplay.qml</file>
+<file>DesktopTheme.qml</file>
 </qresource>
 </RCC>

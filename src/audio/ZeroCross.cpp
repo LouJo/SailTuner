@@ -69,7 +69,7 @@ pair<double,double> FindPattern(const vector<double> &values, double pattern_min
 			best = res;
 		}
 	}
-	cerr << " -> " << best.first << " " << best.second << endl;
+	//cerr << " -> " << best.first << " " << best.second << endl;
 	if (best.second > CORRECT_DEVIATION) return pair<double,double>(0,0);
 	return best;
 }
