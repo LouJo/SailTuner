@@ -2,9 +2,11 @@
 #include <QQuickView>
 #include <QtQml>
 
-int main(int argc, char* argv[])
+#include "Tuner.hpp"
+
+Q_DECL_EXPORT int main(int argc, char* argv[])
 {
-//	qmlRegisterType<DBMeter>("LJDBMeter", 1, 0, "DBMeter");
+	qmlRegisterType<Tuner>("LJTuner", 1, 0, "Tuner");
 
 	QGuiApplication app(argc, argv);
 	QQuickView view;
