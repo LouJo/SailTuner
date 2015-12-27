@@ -3,11 +3,16 @@
 
 #include "audio/LinearFilter.hpp"
 #include "audio/ZeroCross.hpp"
+#include "scale/Scale.hpp"
 
 class Tuner : public QObject {
 	Q_OBJECT
 	Q_PROPERTY(bool running READ GetRunning WRITE SetRunning NOTIFY runningChanged)
 	Q_PROPERTY(double freq READ GetFreq NOTIFY freqChanged)
+	Q_PROPERTY(double deviation READ GetDeviation NOTIFY deviationChanged)
+	Q_PROPERTY(int note READ GetNote NOTIFY noteChanged)
+	Q_PROPERTY(int octave READ GetOctave NOTIFY octaveChanged)
+	Q_PROPERTY(QString noteName READ GetNoteName NOTIFY noteNameChanged)
 
 	private:
 	QAudioRecorder *recorder;
@@ -16,9 +21,11 @@ class Tuner : public QObject {
 
 	LinearFilter<int16_t> *high_filter;
 	ZeroCross<int16_t> *cross;
+	Scale *scale;
 
 	bool running;
-	double freq;
+	double freq, deviation;
+	int note, octave;
 
 	static const int rate = 16000;
 	static const int defaultNbFrame = 1024;
@@ -40,8 +47,16 @@ class Tuner : public QObject {
 	bool GetRunning();
 	void SetRunning(bool r);
 	double GetFreq();
+	int GetNote();
+	int GetOctave();
+	double GetDeviation();
+	QString GetNoteName();
 
 	signals:
 	void runningChanged();
 	void freqChanged();
+	void noteChanged();
+	void noteNameChanged();
+	void octaveChanged();
+	void deviationChanged();
 };

@@ -23,5 +23,14 @@ Column {
 	Component.onCompleted: {
 		var freq = simpleText.createObject(this)
 		freq.text = Qt.binding(function () { return tuner ? tuner.freq.toFixed(2) + " Hz" : "NaN" })
+
+		var note = simpleText.createObject(this)
+		note.text = Qt.binding(function() { return tuner.noteName })
+
+		var octave = simpleText.createObject(this)
+		octave.text = Qt.binding(function() { return tuner.octave })
+
+		var deviation = simpleText.createObject(this)
+		deviation.text = Qt.binding(function() { return tuner.deviation.toFixed(3) })
 	}
 }

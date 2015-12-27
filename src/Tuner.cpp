@@ -15,11 +15,16 @@ static double b10[] = { 0.99608071, -2.98824212,  2.98824212, -0.99608071 };
 Tuner::Tuner()
 {
 	running = false;
+	freq = deviation = 0;
+	note = octave = 0; 
 
 	high_filter = new LinearFilter<int16_t>(3, a10, b10);
 
 	ZeroCross<int16_t>::Config cross_config({rate, defaultNbFrame, defaultFreqMin, defaultFreqMax});
 	cross = new ZeroCross<int16_t>(cross_config);
+
+	scale = new Scale();
+	scale->ConstructEqualTemperament();
 
 	settings.setCodec("audio/PCM");
 	settings.setChannelCount(1);
@@ -42,6 +47,7 @@ Tuner::~Tuner()
 	delete high_filter;
 	delete cross;
 	delete recorder;
+	delete scale;
 }
 
 void Tuner::Start()
@@ -78,6 +84,15 @@ void Tuner::AudioCb(const QAudioBuffer &buffer)
 	if (freq != cross->Freq()) {
 		freq = cross->Freq();
 		freqChanged();
+
+		if (freq) {
+			note = scale->FindNote(freq, octave, deviation);
+			noteChanged();
+			noteNameChanged();
+			octaveChanged();
+			deviationChanged();
+			//std::cerr << note << " " << scale->NoteName(note) << std::endl;
+		}
 	}
 }
 
@@ -97,4 +112,24 @@ void Tuner::SetRunning(bool r)
 double Tuner::GetFreq()
 {
 	return freq;
+}
+
+int Tuner::GetNote()
+{
+	return note;
+}
+
+double Tuner::GetDeviation()
+{
+	return deviation;
+}
+
+int Tuner::GetOctave()
+{
+	return octave;
+}
+
+QString Tuner::GetNoteName()
+{
+	return scale->NoteName(note);
 }

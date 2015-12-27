@@ -12,9 +12,11 @@ SOURCES += \
 	src/sailfish.cpp \
 	src/Tuner.cpp \
 	src/audio/LinearFilter.cpp \
-	src/audio/ZeroCross.cpp
+	src/audio/ZeroCross.cpp \
+	src/scale/Scale.cpp
 
 HEADERS += \
 	src/Tuner.hpp \
 	src/audio/LinearFilter.hpp \
-	src/audio/ZeroCross.hpp
+	src/audio/ZeroCross.hpp \
+	src/scale/Scale.hpp
