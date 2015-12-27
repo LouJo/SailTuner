@@ -9,7 +9,7 @@ using namespace std;
 /// Maximum rest of division to be a multiple of
 #define EPS_DIVISOR 0.1
 /// Consider it is a correct pattern to avoid multiples of
-#define CORRECT_DEVIATION 0.05
+#define CORRECT_DEVIATION 1
 
 // local functions
 
@@ -69,8 +69,8 @@ pair<double,double> FindPattern(const vector<double> &values, double pattern_min
 			best = res;
 		}
 	}
+	cerr << " -> " << best.first << " " << best.second << endl;
 	if (best.second > CORRECT_DEVIATION) return pair<double,double>(0,0);
-	cout << " -> " << best.first << " " << best.second << "  ";
 	return best;
 }
 

@@ -46,6 +46,7 @@ Tuner::~Tuner()
 
 void Tuner::Start()
 {
+	cerr << __func__ << endl;
 	high_filter->Clear();
 	cross->Clear();
 	recorder->record();
@@ -55,6 +56,7 @@ void Tuner::Start()
 
 void Tuner::Stop()
 {
+	cerr << __func__ << endl;
 	running = false;
 	recorder->stop();
 	runningChanged();

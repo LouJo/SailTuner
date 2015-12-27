@@ -1,0 +1,11 @@
+[Desktop Entry]
+Type=Application
+Icon=harbour-sailtuner
+Exec=harbour-sailtuner
+X-Nemo-Application-Type=silica-qt5
+Name=SailTuner
+# translation example:
+# your app name in German locale (de)
+#
+# Remember to comment out the following line, if you do not want to use
+# a different app name in German locale (de).
