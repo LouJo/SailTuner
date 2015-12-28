@@ -77,9 +77,13 @@ void Tuner::ComputeFrame(int16_t v)
 void Tuner::AudioCb(const QAudioBuffer &buffer)
 {
 	const int16_t *ptr = buffer.constData<int16_t>();
-	int nbFrame = buffer.sampleCount();
+	const int nbFrame = buffer.sampleCount();
+	AudioAnalyse(ptr, nbFrame);
+}
 
-	while (nbFrame--) ComputeFrame(*ptr++);
+void Tuner::AudioAnalyse(const int16_t *ptr, int nb_frame)
+{
+	while (nb_frame--) ComputeFrame(*ptr++);
 
 	if (freq != cross->Freq()) {
 		freq = cross->Freq();
@@ -129,7 +133,7 @@ int Tuner::GetOctave()
 	return octave;
 }
 
-QString Tuner::GetNoteName()
+const char* Tuner::GetNoteName()
 {
 	return scale->NoteName(note);
 }

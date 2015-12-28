@@ -44,13 +44,15 @@ class Tuner : public QObject {
 	void Start();
 	void Stop();
 
+	void AudioAnalyse(const int16_t *buffer, int size);
+
 	bool GetRunning();
 	void SetRunning(bool r);
 	double GetFreq();
 	int GetNote();
 	int GetOctave();
 	double GetDeviation();
-	QString GetNoteName();
+	const char* GetNoteName();
 
 	signals:
 	void runningChanged();

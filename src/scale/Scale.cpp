@@ -62,7 +62,7 @@ int Scale::FindNote(double freq, int &octave, double &deviation)
 	int note = 0;
 	octave = findOctave(freq);
 
-	std::cerr << octave << "  " << freq << std::endl;
+	//std::cerr << octave << "  " << freq << std::endl;
 	assert(freq >= actualRange[0] && freq <= actualRange[1]);
 
 	while (actualNoteFreq[note] < freq && note < nbNote - 1) note++;
