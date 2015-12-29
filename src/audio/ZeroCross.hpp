@@ -4,6 +4,18 @@
 #include <stdint.h>
 #include <vector>
 
+namespace patterns {
+
+	struct Pattern {
+		double time, energy;
+	};
+	struct PatternMatch {
+		double time, time_deviation, energy_deviation;
+		PatternMatch() : time(0), time_deviation(0), energy_deviation(0) {}
+	};
+
+};
+
 template<typename sample_t> class ZeroCross {
 	public:
 	struct Config {
@@ -14,11 +26,11 @@ template<typename sample_t> class ZeroCross {
 
 	private:
 	int rate, nb_frame_to_analyse, nb_frame_analysed, diff_x;
-	double nb_frame_current;
+	patterns::Pattern pattern_current;
 	int16_t last_sample;
 	double freq, sample_min, sample_max;
 	bool last_zero;
-	std::vector<double> pattern;
+	std::vector<patterns::Pattern> pattern;
 
 	inline void ComputeFrame(sample_t x);
 
