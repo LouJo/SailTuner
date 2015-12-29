@@ -1,4 +1,4 @@
-QT += qml quick gui multimedia
+QT += qml quick gui multimedia dbus
 TARGET = harbour-sailtuner
 
 CONFIG += c++11 sailfishapp sailfishapp_i18n

@@ -3,6 +3,8 @@
 
 #include <QCoreApplication>
 #include <QUrl>
+#include <QDBusConnection>
+#include <QDBusInterface>
 
 #include "Tuner.hpp"
 
@@ -11,6 +13,21 @@ using namespace std;
 // high 10hz / 16k
 static double a10[] = { 1        , -2.99214602,  2.98432286, -0.99217678 };
 static double b10[] = { 0.99608071, -2.98824212,  2.98824212, -0.99608071 };
+
+// function to prevent screen blank
+
+static void blank_prevent(bool prevent)
+{
+	cerr << __func__ << endl;
+	QDBusConnection system = QDBusConnection::connectToBus(QDBusConnection::SystemBus, "system");
+	QDBusInterface interface("com.nokia.mce", "/com/nokia/mce/request", "com.nokia.mce.request", system);
+
+	if (prevent) {
+		interface.call(QLatin1String("req_display_blanking_pause"));
+	} else {
+		interface.call(QLatin1String("req_display_cancel_blanking_pause"));
+	}
+}
 
 Tuner::Tuner()
 {
@@ -53,6 +70,8 @@ Tuner::~Tuner()
 void Tuner::Start()
 {
 	cerr << __func__ << endl;
+	nb_sample_running = 0;
+	blank_prevent(true);
 	high_filter->Clear();
 	cross->Clear();
 	recorder->record();
@@ -66,6 +85,7 @@ void Tuner::Stop()
 	running = false;
 	recorder->stop();
 	runningChanged();
+	blank_prevent(false);
 }
 
 void Tuner::ComputeFrame(int16_t v)
@@ -83,6 +103,8 @@ void Tuner::AudioCb(const QAudioBuffer &buffer)
 
 void Tuner::AudioAnalyse(const int16_t *ptr, int nb_frame)
 {
+	nb_sample_running += nb_frame;
+
 	while (nb_frame--) ComputeFrame(*ptr++);
 
 	if (freq != cross->Freq()) {
@@ -97,6 +119,11 @@ void Tuner::AudioAnalyse(const int16_t *ptr, int nb_frame)
 			deviationChanged();
 			//std::cerr << note << " " << scale->NoteName(note) << std::endl;
 		}
+	}
+
+	if (nb_sample_running >= nbSamplePreventRunning && running) {
+		nb_sample_running = 0;
+		blank_prevent(true);
 	}
 }
 

@@ -1,4 +1,4 @@
-QT += qml quick gui multimedia
+QT += qml quick gui multimedia dbus
 TARGET = Tuner
 
 CONFIG += c++11

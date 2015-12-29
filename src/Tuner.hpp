@@ -25,12 +25,13 @@ class Tuner : public QObject {
 
 	bool running;
 	double freq, deviation;
-	int note, octave;
+	int note, octave, nb_sample_running;
 
 	static const int rate = 16000;
 	static const int defaultNbFrame = 1024;
 	static const int defaultFreqMin = 50;
 	static const int defaultFreqMax = 2000;
+	static const int nbSamplePreventRunning = rate * 40; // 40 seconds
 
 	inline void ComputeFrame(int16_t v);
 
