@@ -71,6 +71,18 @@ Item {
 		ctx.stroke()
 	}
 
+	function find_region() {
+		var l1 = min
+		var l2
+		for (var i = 0; i < marks.length; i++) {
+			if (i == marks.length - 1) l2 = max
+			else l2 = (marks[i] + marks[i+1]) / 2
+
+			if (level <= l2) return [i, l1, l2]
+			l1 = l2
+		}
+	}
+
 	/// Ellipse
 	Canvas {
 		id: ellipse
@@ -134,33 +146,30 @@ Item {
 	Canvas {
 		/// region colors
 		id: regions
+		property int i_drawed: -1
 		anchors.fill: parent
+		property variant reg: find_region()
 		z: -4
 		onPaint: {
 			var ctx = getContext('2d');
 			ctx.clearRect(0,0,width,height)
 
-			var l1 = min
-			var l2
+			//var reg = find_region()
+			i_drawed = reg[0]
+			var a1 = angle(reg[1])
+			var a2 = angle(reg[2])
+			ctx.fillStyle = region_color[reg[0]]
+			ctx.beginPath()
+			ctx.moveTo(getx(a1, r_circle_min), gety(a1, r_circle_min))
+			arc_part(ctx, r_circle_min, a1, a2)
+			arc_part(ctx, r_circle_max, a2, a1)
+			ctx.lineTo(getx(a1, r_circle_min), gety(a1, r_circle_min))
+			ctx.fill()
+		}
 
-			for (var i = 0; i < marks.length; i++) {
-				if (i == marks.length - 1) l2 = max
-				else l2 = (marks[i] + marks[i+1]) / 2
-
-				if (level <= l2) {
-					var a1 = angle(l1)
-					var a2 = angle(l2)
-					ctx.fillStyle = region_color[i]
-					ctx.beginPath()
-					ctx.moveTo(getx(a1, r_circle_min), gety(a1, r_circle_min))
-					arc_part(ctx, r_circle_min, a1, a2)
-					arc_part(ctx, r_circle_max, a2, a1)
-					ctx.lineTo(getx(a1, r_circle_min), gety(a1, r_circle_min))
-					ctx.fill()
-					break;
-				}
-				l1 = l2
-			}
+		function update_level() {
+			reg = find_region()
+			if (reg[0] != i_drawed) requestPaint()
 		}
 	}
 
@@ -173,7 +182,7 @@ Item {
 
 	onLevelChanged: {
 		arrow.requestPaint()
-		regions.requestPaint()
+		regions.update_level()
 	}
 
 	MouseArea {
@@ -181,5 +190,5 @@ Item {
 		onClicked: {
 			level = Math.random() * (max - min) + min
 		}
-	}	
+	}
 }
