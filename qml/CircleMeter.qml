@@ -23,7 +23,7 @@ Item {
 	property double r_circle_min: 0.85
 	property double r_circle_max: 1
 
-	property double r_arrow_base: 0.1
+	property double r_arrow_base: 0.05
 
 	property double amin: angle(min)
 	property double amax: angle(max)
@@ -38,6 +38,9 @@ Item {
 	function gety(angle, k) {
 		// k: [0,1]
 		return height - height * k * Math.cos(angle)
+	}
+	function dist(x1, y1, x2, y2) {
+		return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2))
 	}
 
 	/// objects draw
@@ -115,6 +118,13 @@ Item {
 			ctx.textAlign = "center"
 			//ctx.fillStyle = theme.secondaryColor
 
+			// first sub marks
+			ctx.strokeStyle = theme.primaryColor
+			ctx.lineWidth = h_submarker
+			for (var j = marks[0] - submarks_int; j > min; j -= submarks_int) {
+				line_mark(ctx, j, r_circle_min - l_submarker, r_circle_min + l_submarker)
+			}
+
 			for (var i = 0; i < marks.length; i++) {
 				ctx.strokeStyle = theme.secondaryColor
 				ctx.lineWidth = h_marker
@@ -150,18 +160,44 @@ Item {
 		id: arrow
 		anchors.fill: parent
 		property double k: 0.82
-		property double k_base: r_arrow_base
 		property double angle: parent.angle(level)
+
+		property double r_base: 0.06
+		property double k_head: 0.1 // arrow width factor of base
 
 		onPaint: {
 			var ctx = getContext('2d');
 			ctx.clearRect(0,0,width,height)
-			ctx.strokeStyle = theme.primaryColor
-			ctx.lineWidth = 1
+
+			// arrow base center
+			var x = getx(angle, r_arrow_base + r_base)
+			var y = gety(angle, r_arrow_base + r_base)
+			// arrow base radius
+			var d_base = dist(x, y, getx(angle, r_arrow_base), gety(angle, r_arrow_base))
+			// arrow head width
+			var d_head = d_base * k_head
+
 			ctx.beginPath()
-			ctx.moveTo(getx(angle, k_base), gety(angle, k_base))
-			ctx.lineTo(getx(angle, k), gety(angle, k))
+			// base
+			var x1 = x - d_base * Math.cos(angle)
+			var y1 = y - d_base * Math.sin(angle)
+			ctx.moveTo(x1, y1)
+			ctx.arc(x, y, d_base, Math.PI + angle, angle, 1)
+			// head
+			var dx = d_head * Math.cos(angle)
+			var dy = d_head * Math.sin(angle)
+			var hx = getx(angle, k)
+			var hy = gety(angle, k)
+			ctx.lineTo(hx + dx, hy + dy)
+			ctx.lineTo(hx - dx, hy - dy)
+			ctx.closePath()
 			ctx.stroke()
+
+			var grd = ctx.createLinearGradient(dx + hx, dy + hy, x1, y1)
+			grd.addColorStop(0, 'rgba(128,128,128,0.5)')
+			grd.addColorStop(1, "transparent")
+			ctx.fillStyle = grd
+			ctx.fill()
 		}
 	}
 
