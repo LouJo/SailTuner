@@ -12,12 +12,16 @@ Item {
 	// note or note + 12 * octave
 	property int note: 1
 
-	property variant notes_fr: ["do", "do#", "ré", "mib", "mi", "fa", "fa#", "sol", "sol#", "la", "sib", "si"]
+	property variant notes_fr: [
+		"do", "do#", "ré", "mib", "mi", "fa", "fa#", "sol", "sol#", "la", "sib", "si"]
 	property variant notes_en: [
-		"C", "C#", "D", "Eb", "E", "F", "F#", "G", "G#", "A", "Bb", "B"
-	]
+		"C", "C#", "D", "Eb", "E", "F", "F#", "G", "G#", "A", "Bb", "B"]
 	property variant notes: [notes_en, notes_fr]
 	property int notes_style: 0
+
+	property color colorAltered: "#40888888"
+
+	property int h_margin: Math.max(height / 8, main_note.border_d)
 
 	property int nb_notes: 12
 	/// current note is on the middle
@@ -28,6 +32,10 @@ Item {
 
 	function note_name(i) {
 		return notes[notes_style][i];
+	}
+
+	function isAltered(i) {
+		return (i < 4 && (i & 1)) || (i > 5 && !(i & 1))
 	}
 
 	Behavior on position {
@@ -44,6 +52,8 @@ Item {
 		anchors.leftMargin: - cellWidth * delta
 		anchors.bottom: parent.bottom
 		anchors.right: parent.right
+		anchors.topMargin: h_margin
+		anchors.bottomMargin: h_margin
 		property double cellWidth: parent.width / nb_notes
 
 		Repeater {
@@ -52,11 +62,13 @@ Item {
 				width: toise.cellWidth
 				height: parent.height
 				border.width: 1
+				property int note: (index + nb_notes + first_note) % nb_notes
+				color: isAltered(note) ? colorAltered : "transparent"
 
 				Text {
 					anchors.horizontalCenter: parent.horizontalCenter
 					anchors.verticalCenter: parent.verticalCenter
-					text: note_name((index + nb_notes + first_note) % nb_notes)
+					text: note_name(note)
 				}
 			}
 		}
@@ -66,6 +78,22 @@ Item {
 		anchors.fill: parent
 		onClicked: note = Math.random() * 100
 	}
+
+	// Screen for actual note
+	Rectangle {
+		id: main_note
+		y: 0
+		x: toise.cellWidth * 5.5 - border_d
+		width: toise.cellWidth + border_d * 2
+		height: parent.height
+
+		property int border_d: 10
+
+		color: "transparent"
+		border.width: border_d
+		border.color: "#a0777777"
+	}
+
 /*
 	onPositionChanged: {
 		console.log("note " + note_name(note % nb_notes) + " pos " + position + " first note " + first_note + " delta " + delta)

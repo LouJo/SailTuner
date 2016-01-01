@@ -12,22 +12,25 @@ Item {
 	property QtObject theme
 
 	anchors.fill: parent
-	property int h_free: parent.height - parent.width / 2
+	property int h_margin: (height - meter.height - toise.height) / 3
 
 	CircleMeter {
 		id: meter
 		theme: parent.theme
-		y: (h_free - toise.height) / 3
-		width: Math.min(parent.width, parent.height * 2)
+
+		anchors.top: parent.top
+		anchors.topMargin: h_margin
+
+		width: parent.width
 		height: width / 2
 	}
 
 	ScaleToise {
 		id: toise
-		anchors.bottom: parent.bottom
+		anchors.top: meter.bottom
+		anchors.topMargin: h_margin
 		anchors.left: parent.left
 		width: parent.width
-		height: Math.min(h_free, width / 12)
-		anchors.bottomMargin: (h_free - height) / 3
+		height: width / 10
 	}
 }
