@@ -14,7 +14,7 @@ Item {
 	/// numbers to write on the scale
 	property variant marks: [-40, -20, 0, 20, 40]
 	/// marks regions colors
-	property variant region_color: ["red", "yellow", "green", "yellow", "red"]
+	property variant region_color: ["#F88E48", "#F8DE48", "#99E882", "#F8DE48", "#F88E48"]
 	/// theme object
 	property QtObject theme
 
@@ -150,15 +150,25 @@ Item {
 		property variant reg_drawed
 		anchors.fill: parent
 		property variant reg: find_region()
+		property double r_avg: (r_circle_min + r_circle_max) / 2
 		z: -4
 		onPaint: {
 			var ctx = getContext('2d');
 			ctx.clearRect(0,0,width,height)
 
-			//var reg = find_region()
-			var a1 = angle(reg[1])
-			var a2 = angle(reg[2])
-			ctx.fillStyle = region_color[reg[0]]
+			var a0 = angle(marks[reg[0]]) // angle of mark
+			var a1 = angle(reg[1]) // min angle of region
+			var a2 = angle(reg[2]) // max angle of region
+
+			// gradient
+			var x_center = getx(a0, r_avg);
+			var y_center = gety(a0, r_avg);
+			var grd = ctx.createRadialGradient(x_center, y_center, 2, x_center, y_center,
+				(reg[2] - reg[1]) * (width + height) / 2 / (max - min))
+			grd.addColorStop(0, region_color[reg[0]])
+			grd.addColorStop(1, "transparent")
+
+			ctx.fillStyle = grd
 			ctx.beginPath()
 			ctx.moveTo(getx(a1, r_circle_min), gety(a1, r_circle_min))
 			arc_part(ctx, r_circle_min, a1, a2)
@@ -166,7 +176,6 @@ Item {
 			ctx.lineTo(getx(a1, r_circle_min), gety(a1, r_circle_min))
 			ctx.fill()
 			reg_drawed = reg
-			console.log("redraw")
 		}
 
 		function update_level() {
