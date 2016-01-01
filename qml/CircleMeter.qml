@@ -13,6 +13,8 @@ Item {
 	property double max: 50
 	/// numbers to write on the scale
 	property variant marks: [-40, -20, 0, 20, 40]
+	/// interval of little marks
+	property double submarks_int: 5
 	/// marks regions colors
 	property variant region_color: ["#F88E48", "#F8DE48", "#99E882", "#F8DE48", "#F88E48"]
 	/// theme object
@@ -20,6 +22,8 @@ Item {
 
 	property double r_circle_min: 0.85
 	property double r_circle_max: 1
+
+	property double r_arrow_base: 0.1
 
 	property double amin: angle(min)
 	property double amax: angle(max)
@@ -92,7 +96,11 @@ Item {
 		property double r_text: 0.92
 
 		property double l_marker: 0.035
-		property double h_marker: 7
+		property double h_marker: 6
+
+		property double l_submarker: 0.020
+		property double h_submarker: 2
+
 		property int font_size: 20
 
 		onPaint: {
@@ -105,14 +113,22 @@ Item {
 
 			ctx.font = font_size + "px sans-serif"
 			ctx.textAlign = "center"
+			//ctx.fillStyle = theme.secondaryColor
 
-			ctx.lineWidth = h_marker
-			ctx.strokeStyle = theme.secondaryColor
 			for (var i = 0; i < marks.length; i++) {
+				ctx.strokeStyle = theme.secondaryColor
+				ctx.lineWidth = h_marker
 				line_mark(ctx, marks[i], r_circle_min - l_marker, r_circle_min + l_marker)
 				var a = angle(marks[i])
 				ctx.fillText(marks[i], getx(a, r_text), gety(a, r_text) + 4)
 				ctx.strokeText()
+				// sub marks
+				ctx.strokeStyle = theme.primaryColor
+				ctx.lineWidth = h_submarker
+				var j_max = (i == marks.length - 1 ? max : marks[i+1])
+				for (var j = marks[i] + submarks_int; j < j_max; j += submarks_int) {
+					line_mark(ctx, j, r_circle_min - l_submarker, r_circle_min + l_submarker)
+				}
 			}
 
 			// "beetween" marks
@@ -121,6 +137,11 @@ Item {
 			for (var i = 0; i < marks.length - 1; i++) {
 				line_mark(ctx, (marks[i] + marks[i+1])/2, r_circle_min, r_circle_max)
 			}
+
+			// center: arrow base
+			ctx.lineWidth = 1
+			ctx.strokeStyle = theme.secondaryColor
+			arc(ctx, r_arrow_base)
 		}
 	}
 
@@ -129,7 +150,7 @@ Item {
 		id: arrow
 		anchors.fill: parent
 		property double k: 0.82
-		property double k_base: 0.1
+		property double k_base: r_arrow_base
 		property double angle: parent.angle(level)
 
 		onPaint: {
