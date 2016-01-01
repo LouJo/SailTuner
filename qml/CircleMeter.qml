@@ -24,6 +24,7 @@ Item {
 	property double r_circle_max: 1
 
 	property double r_arrow_base: 0.05
+	property double _height: width / 2
 
 	property double amin: angle(min)
 	property double amax: angle(max)
@@ -37,10 +38,22 @@ Item {
 	}
 	function gety(angle, k) {
 		// k: [0,1]
-		return height - height * k * Math.cos(angle)
+		return _height - _height * k * Math.cos(angle)
 	}
 	function dist(x1, y1, x2, y2) {
 		return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2))
+	}
+
+	// return the 2 orthoganals points from b with ref a, with dist d from b
+	function orth(ax, ay, bx, by, d) {
+		var D = dist(ax, ay, bx, by)
+		var k = d / D
+		var kx = k * (bx - ax);
+		var ky = k * (by - ay);
+		return [
+			bx + ky, by - kx,
+			bx - ky, by + kx
+		];
 	}
 
 	/// objects draw
@@ -152,6 +165,14 @@ Item {
 			ctx.lineWidth = 1
 			ctx.strokeStyle = theme.secondaryColor
 			arc(ctx, r_arrow_base)
+
+			// bottom line
+			ctx.lineWidth = 1
+			ctx.strokeStyle = theme.primaryColor
+			ctx.beginPath()
+			ctx.moveTo(0, _height - 1)
+			ctx.lineTo(width - 1, _height - 1)
+			ctx.stroke()
 		}
 	}
 
@@ -162,40 +183,52 @@ Item {
 		property double k: 0.82
 		property double angle: parent.angle(level)
 
-		property double r_base: 0.06
+		property double r_base: 0.055
+		property double r_circle_base: r_arrow_base * 0.6
 		property double k_head: 0.1 // arrow width factor of base
+		property double lref: width / 2
 
 		onPaint: {
 			var ctx = getContext('2d');
 			ctx.clearRect(0,0,width,height)
 
+			ctx.lineWidth = 1
+
 			// arrow base center
-			var x = getx(angle, r_arrow_base + r_base)
-			var y = gety(angle, r_arrow_base + r_base)
+			var x = getx(0, r_arrow_base + r_base)
+			var y = gety(0, r_arrow_base + r_base)
 			// arrow base radius
-			var d_base = dist(x, y, getx(angle, r_arrow_base), gety(angle, r_arrow_base))
+			var d_base = r_base * width / 2
 			// arrow head width
 			var d_head = d_base * k_head
 
+			// base internal circle
+			ctx.strokeStyle = theme.secondaryColor
 			ctx.beginPath()
+			ctx.arc(x, y + 0 *(r_base - r_circle_base) * lref, r_circle_base * lref, 0, Math.PI * 2)
+			ctx.stroke()
+
 			// base
+			ctx.beginPath()
+			ctx.strokeStyle = theme.primaryColor
+
 			var x1 = x - d_base * Math.cos(angle)
 			var y1 = y - d_base * Math.sin(angle)
 			ctx.moveTo(x1, y1)
 			ctx.arc(x, y, d_base, Math.PI + angle, angle, 1)
 			// head
-			var dx = d_head * Math.cos(angle)
-			var dy = d_head * Math.sin(angle)
 			var hx = getx(angle, k)
 			var hy = gety(angle, k)
-			ctx.lineTo(hx + dx, hy + dy)
-			ctx.lineTo(hx - dx, hy - dy)
+			var bout = orth(x, y, hx, hy, d_head)
+			ctx.lineTo(bout[2], bout[3])
+			ctx.lineTo(bout[0], bout[1])
 			ctx.closePath()
 			ctx.stroke()
-
-			var grd = ctx.createLinearGradient(dx + hx, dy + hy, x1, y1)
-			grd.addColorStop(0, 'rgba(128,128,128,0.5)')
-			grd.addColorStop(1, "transparent")
+			// gradient
+			var middle1 = orth(x, y, x + (hx - x) * 0.7, y + (hy - y) * 0.7, d_base + (d_head - d_base) * 0.7)
+			var grd = ctx.createLinearGradient(middle1[0], middle1[1], middle1[2], middle1[3])
+			grd.addColorStop(1, 'rgba(128,128,128,0.2)')
+			grd.addColorStop(0, "transparent")
 			ctx.fillStyle = grd
 			ctx.fill()
 		}
@@ -211,7 +244,7 @@ Item {
 		z: -4
 		onPaint: {
 			var ctx = getContext('2d');
-			ctx.clearRect(0,0,width,height)
+			ctx.clearRect(0,0,width,_height)
 
 			var a0 = angle(marks[reg[0]]) // angle of mark
 			var a1 = angle(reg[1]) // min angle of region
@@ -221,7 +254,7 @@ Item {
 			var x_center = getx(a0, r_avg);
 			var y_center = gety(a0, r_avg);
 			var grd = ctx.createRadialGradient(x_center, y_center, 2, x_center, y_center,
-				(reg[2] - reg[1]) * (width + height) / 2 / (max - min))
+				(reg[2] - reg[1]) * (width + _height) / 2 / (max - min))
 			grd.addColorStop(0, region_color[reg[0]])
 			grd.addColorStop(1, "transparent")
 

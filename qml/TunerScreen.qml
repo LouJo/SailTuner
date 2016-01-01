@@ -16,5 +16,8 @@ Item {
 	CircleMeter {
 		theme: parent.theme
 		anchors.fill: parent
+		/*
+		width: Math.min(parent.width, parent.height * 2)
+		height: width / 2*/
 	}
 }
