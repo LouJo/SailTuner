@@ -39,6 +39,6 @@ Item {
 		width: meter.width
 		height: width / 10
 
-		note: tuner.note * tuner.octave
+		note: tuner.note + toise.nb_notes * tuner.octave
 	}
 }

@@ -60,27 +60,9 @@ Item {
 
 	function arc(ctx, k) {
 		ctx.beginPath()
-		ctx.moveTo(getx(amin, k), gety(amin, k))
-		for (var i = amin + 0.01; i <= amax; i+=0.01) {
-			ctx.lineTo(getx(i,k), gety(i,k))
-		}
+		ctx.arc(width/2, height + 1, k * width / 2, 0, Math.PI, 1)
 		ctx.stroke()
-	}
-
-	function arc_part(ctx, k, a1, a2) {
-		ctx.lineTo(getx(a1,k), gety(a1,k))
-		var eps = 0.01
-		if (a2 > a1) {
-			for (var i = a1 + eps; i < a2; i+=eps) {
-				ctx.lineTo(getx(i,k), gety(i,k))
-			}
-		}
-		else {
-			for (var i = a1 - eps; i > a2; i-=eps) {
-				ctx.lineTo(getx(i,k), gety(i,k))
-			}
-		}
-		ctx.lineTo(getx(a2,k), gety(a2,k))
+		return
 	}
 
 	function line_mark(ctx, value, r_min, r_max) {
@@ -89,22 +71,6 @@ Item {
 		ctx.moveTo(getx(a, r_min), gety(a, r_min))
 		ctx.lineTo(getx(a, r_max), gety(a, r_max))
 		ctx.stroke()
-	}
-
-	function find_region() {
-		var l1 = min
-		var l2
-
-		if (!marks) return [0,0,0]
-
-		for (var i = 0; i < marks.length; i++) {
-			if (i == marks.length - 1) l2 = max
-			else l2 = (marks[i] + marks[i+1]) / 2
-
-			if (level <= l2) return [i, l1, l2]
-			l1 = l2
-		}
-		return [0,0,0]
 	}
 
 	/// Ellipse
@@ -192,11 +158,28 @@ Item {
 		property double k_head: 0.1 // arrow width factor of base
 		property double lref: width / 2
 
+		property bool is_line: false // simple line (true) or designed (false)
+		property bool has_gradient: false // beautiful gradient
+
 		onPaint: {
 			var ctx = getContext('2d');
 			ctx.clearRect(0,0,width,height)
 
 			ctx.lineWidth = 1
+			ctx.strokeStyle = theme.primaryColor
+
+			// line only
+			if (is_line) {
+				var x = getx(angle, r_arrow_base)
+				var y = gety(angle, r_arrow_base)
+				var hx = getx(angle, k)
+				var hy = gety(angle, k)
+				ctx.beginPath()
+				ctx.moveTo(x,y)
+				ctx.lineTo(hx,hy)
+				ctx.stroke()
+				return
+			}
 
 			// arrow base center
 			var x = getx(0, r_arrow_base + r_base)
@@ -228,74 +211,28 @@ Item {
 			ctx.lineTo(bout[0], bout[1])
 			ctx.closePath()
 			ctx.stroke()
-			// gradient
-			var middle1 = orth(x, y, x + (hx - x) * 0.7, y + (hy - y) * 0.7, d_base + (d_head - d_base) * 0.7)
-			var grd = ctx.createLinearGradient(middle1[0], middle1[1], middle1[2], middle1[3])
-			grd.addColorStop(1, 'rgba(128,128,128,0.2)')
-			grd.addColorStop(0, "transparent")
-			ctx.fillStyle = grd
-			ctx.fill()
-		}
-	}
-
-	Canvas {
-		/// region colors
-		id: regions
-		property variant reg_drawed
-		anchors.fill: parent
-		property variant reg: find_region()
-		property double r_avg: (r_circle_min + r_circle_max) / 2
-		z: -4
-		onPaint: {
-			var ctx = getContext('2d');
-			ctx.clearRect(0,0,width,_height)
-
-			var a0 = angle(marks[reg[0]]) // angle of mark
-			var a1 = angle(reg[1]) // min angle of region
-			var a2 = angle(reg[2]) // max angle of region
 
 			// gradient
-			var x_center = getx(a0, r_avg);
-			var y_center = gety(a0, r_avg);
-			var grd = ctx.createRadialGradient(x_center, y_center, 2, x_center, y_center,
-				(reg[2] - reg[1]) * (width + _height) / 2 / (max - min))
-			grd.addColorStop(0, region_color[reg[0]])
-			grd.addColorStop(1, "transparent")
-
-			ctx.fillStyle = grd
-			ctx.beginPath()
-			ctx.moveTo(getx(a1, r_circle_min), gety(a1, r_circle_min))
-			arc_part(ctx, r_circle_min, a1, a2)
-			arc_part(ctx, r_circle_max, a2, a1)
-			ctx.lineTo(getx(a1, r_circle_min), gety(a1, r_circle_min))
-			ctx.fill()
-			reg_drawed = reg
-		}
-
-		function update_level() {
-			if (!reg_drawed || level > reg_drawed[2] || level < reg_drawed[1]) {
-				reg = find_region()
-				requestPaint()
+			if (has_gradient) {
+				var middle1 = orth(x, y, x + (hx - x) * 0.7, y + (hy - y) * 0.7, d_base + (d_head - d_base) * 0.7)
+				var grd = ctx.createLinearGradient(middle1[0], middle1[1], middle1[2], middle1[3])
+				grd.addColorStop(1, 'rgba(128,128,128,0.2)')
+				grd.addColorStop(0, "transparent")
+				ctx.fillStyle = grd
+				ctx.fill()
 			}
 		}
 	}
 
+/*
 	Behavior on level {
 		NumberAnimation {
 			duration: 50
 			easing.amplitude: max - min
 		}
 	}
-
+	*/
 	onLevelChanged: {
 		arrow.requestPaint()
-		regions.update_level()
 	}
-/*
-	MouseArea {
-		anchors.fill: parent
-		onClicked: {
-			level = Math.random() * (max - min) + min
-		}
-	}*/
 }

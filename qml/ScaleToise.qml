@@ -79,13 +79,6 @@ Item {
 		}
 	}
 
-	/*
-	MouseArea {
-		anchors.fill: parent
-		onClicked: note = Math.random() * 100
-	}
-	*/
-
 	// Screen for actual note
 	Rectangle {
 		id: main_note
