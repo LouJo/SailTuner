@@ -2,8 +2,8 @@ import QtQuick 2.0
 import LJTuner 1.0
 
 Item {
-	width: 400
-	height: 300
+	width: 600
+	height: 500
 
 	Tuner {
 		id: tuner
@@ -14,7 +14,8 @@ Item {
 		id: theme
 	}
 
-	SimpleDisplay {
+	TunerScreen {
+		anchors.fill: parent
 		theme: theme
 		tuner: tuner
 	}

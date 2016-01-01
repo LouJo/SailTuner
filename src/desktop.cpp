@@ -41,6 +41,7 @@ Q_DECL_EXPORT int main(int argc, char* argv[])
 	QGuiApplication app(argc, argv);
 	QQuickView view;
 	view.setSource(QUrl("qrc:///qml/Desktop.qml"));
+	view.setResizeMode(view.SizeRootObjectToView);
 	view.show();
 	return app.exec();
 }

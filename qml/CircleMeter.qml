@@ -94,6 +94,9 @@ Item {
 	function find_region() {
 		var l1 = min
 		var l2
+
+		if (!marks) return [0,0,0]
+
 		for (var i = 0; i < marks.length; i++) {
 			if (i == marks.length - 1) l2 = max
 			else l2 = (marks[i] + marks[i+1]) / 2
@@ -138,6 +141,7 @@ Item {
 				line_mark(ctx, j, r_circle_min - l_submarker, r_circle_min + l_submarker)
 			}
 
+			ctx.fillStyle = theme.primaryColor
 			for (var i = 0; i < marks.length; i++) {
 				ctx.strokeStyle = theme.secondaryColor
 				ctx.lineWidth = h_marker
@@ -287,11 +291,11 @@ Item {
 		arrow.requestPaint()
 		regions.update_level()
 	}
-
+/*
 	MouseArea {
 		anchors.fill: parent
 		onClicked: {
 			level = Math.random() * (max - min) + min
 		}
-	}
+	}*/
 }

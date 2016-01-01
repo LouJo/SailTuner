@@ -8,6 +8,8 @@ import QtQuick 2.0
 
 Item {
 	id: scale
+
+	property QtObject theme
 	
 	// note or note + 12 * octave
 	property int note: 1
@@ -20,6 +22,7 @@ Item {
 	property int notes_style: 0
 
 	property color colorAltered: "#40888888"
+	property color colorNatural: "transparent"
 
 	property int h_margin: Math.max(height / 8, main_note.border_d)
 
@@ -63,21 +66,25 @@ Item {
 				height: parent.height
 				border.width: 1
 				property int note: (index + nb_notes + first_note) % nb_notes
-				color: isAltered(note) ? colorAltered : "transparent"
+				color: isAltered(note) ? colorAltered : colorNatural
 
 				Text {
 					anchors.horizontalCenter: parent.horizontalCenter
 					anchors.verticalCenter: parent.verticalCenter
 					text: note_name(note)
+					color: theme.primaryColor
+					font.pixelSize: parent.height / 2
 				}
 			}
 		}
 	}
 
+	/*
 	MouseArea {
 		anchors.fill: parent
 		onClicked: note = Math.random() * 100
 	}
+	*/
 
 	// Screen for actual note
 	Rectangle {

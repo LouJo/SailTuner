@@ -23,7 +23,8 @@ ApplicationWindow {
 			SilicaFlickable {
 				anchors.fill: parent
 
-				SimpleDisplay {
+				TunerScreen {
+					anchors.fill: parent
 					theme: Theme
 					tuner: app.tuner
 				}

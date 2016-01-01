@@ -3,5 +3,8 @@
 <file>Desktop.qml</file>
 <file>SimpleDisplay.qml</file>
 <file>DesktopTheme.qml</file>
+<file>TunerScreen.qml</file>
+<file>CircleMeter.qml</file>
+<file>ScaleToise.qml</file>
 </qresource>
 </RCC>
