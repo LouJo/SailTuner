@@ -81,6 +81,7 @@ Item {
 			if (level <= l2) return [i, l1, l2]
 			l1 = l2
 		}
+		return [0,0,0]
 	}
 
 	/// Ellipse
@@ -146,7 +147,7 @@ Item {
 	Canvas {
 		/// region colors
 		id: regions
-		property int i_drawed: -1
+		property variant reg_drawed
 		anchors.fill: parent
 		property variant reg: find_region()
 		z: -4
@@ -155,7 +156,6 @@ Item {
 			ctx.clearRect(0,0,width,height)
 
 			//var reg = find_region()
-			i_drawed = reg[0]
 			var a1 = angle(reg[1])
 			var a2 = angle(reg[2])
 			ctx.fillStyle = region_color[reg[0]]
@@ -165,11 +165,15 @@ Item {
 			arc_part(ctx, r_circle_max, a2, a1)
 			ctx.lineTo(getx(a1, r_circle_min), gety(a1, r_circle_min))
 			ctx.fill()
+			reg_drawed = reg
+			console.log("redraw")
 		}
 
 		function update_level() {
-			reg = find_region()
-			if (reg[0] != i_drawed) requestPaint()
+			if (!reg_drawed || level > reg_drawed[2] || level < reg_drawed[1]) {
+				reg = find_region()
+				requestPaint()
+			}
 		}
 	}
 
