@@ -18,7 +18,8 @@ Item {
 		property int note: 2
 		property int octave: 4
 		property double freq: 440
-		property double deviation: 0.1
+		property double deviation: 0.12
+		property bool found: true
 	}
 
 	TunerScreen {

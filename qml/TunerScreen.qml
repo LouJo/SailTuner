@@ -18,6 +18,35 @@ Item {
 	// landscape / portrait
 	property bool is_portrait: height > width
 
+	// maximum absolute deviation to display green led
+	property double deviation_ok: 0.1
+	property color led_green: "green"
+	property color led_red: "red"
+
+	property bool dev_is_ok: Math.abs(tuner.deviation) <= deviation_ok
+
+	Led {
+		anchors.top: meter.top
+		anchors.left: meter.left
+		anchors.topMargin: meter.width / 24 
+		anchors.leftMargin: anchors.topMargin
+		width: meter.width / 12
+		height: width
+		led_color: dev_is_ok ? led_green : led_red
+		visible: tuner.found && (dev_is_ok || tuner.deviation < 0)
+	}
+
+	Led {
+		anchors.top: meter.top
+		anchors.right: meter.right
+		anchors.topMargin: meter.width / 24 
+		anchors.rightMargin: anchors.topMargin
+		width: meter.width / 12
+		height: width
+		led_color: dev_is_ok ? led_green : led_red
+		visible: tuner.found && (dev_is_ok || tuner.deviation > 0)
+	}
+
 	CircleMeter {
 		id: meter
 		theme: parent.theme
