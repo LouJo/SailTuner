@@ -15,6 +15,9 @@ Item {
 	anchors.fill: parent
 	property int h_margin: (height - meter.height - toise.height) / 3
 
+	// landscape / portrait
+	property bool is_portrait: height > width
+
 	CircleMeter {
 		id: meter
 		theme: parent.theme
@@ -30,22 +33,74 @@ Item {
 	}
 
 	Item {
+		id: note_info
+
 		anchors.top: meter.bottom
 		anchors.left: parent.left
 		anchors.right: parent.right
 		anchors.bottom: parent.bottom
 
+		property int toise_h: Math.max(width / 10, theme.fontSizeLarge * 1.8)
+		property double margin_h: parent.is_portrait ? (height - toise_h * 2) / 7 : (height - toise_h) / 2
+
+		Text {
+			id: title_note
+			visible: main.is_portrait
+			text: qsTr("Note")
+
+			font.pixelSize: theme.fontSizeMedium
+			color: theme.highlightColor
+
+			anchors.top: parent.top
+			anchors.topMargin: parent.margin_h
+			anchors.horizontalCenter: parent.horizontalCenter
+		}
+
 		ScaleToise {
 			id: toise
 			theme: main.theme
 
+			anchors.top: main.is_portrait ? title_note.bottom : parent.top
+			anchors.topMargin: parent.margin_h
 			anchors.horizontalCenter: parent.horizontalCenter
-			anchors.verticalCenter: parent.verticalCenter
 
 			width: meter.width
-			height: Math.max(width / 10, theme.fontSizeLarge * 1.8)
+			height: parent.toise_h
 
-			note: tuner.note + toise.nb_notes * tuner.octave
+			note: tuner.note
+			octave: tuner.octave
+		}
+
+		Text {
+			id: title_octave
+			visible: main.is_portrait
+			text: qsTr("Octave")
+
+			font.pixelSize: theme.fontSizeMedium
+			color: theme.highlightColor
+
+			anchors.top: toise.bottom
+			anchors.topMargin: parent.margin_h
+			anchors.horizontalCenter: parent.horizontalCenter
+		}
+
+		// octave toise
+		Toise {
+			anchors.top: main.is_portrait ? title_octave.bottom : toise.bottom
+			anchors.topMargin: parent.margin_h
+			anchors.horizontalCenter: parent.horizontalCenter
+
+			visible: main.is_portrait
+
+			theme: main.theme
+
+			marks: [1, 2, 3, 4, 5, 6, 7, 8, 9]
+			nb_marks_displayed: 4
+
+			width: meter.width / 2
+			height: parent.toise_h
+
+			index: tuner.octave
 		}
 	}
 }

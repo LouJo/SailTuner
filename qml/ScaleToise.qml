@@ -9,10 +9,12 @@ import QtQuick 2.0
 Toise {
 	id: scale
 
-	// note or note + 12 * octave
+	// note
 	property int note: 1
+	// octave
+	property int octave: 4
 	// en or fr
-	property int notes_style: 0
+	property int notes_style: 1
 
 	property variant notes_fr: [
 		"do", "do#", "ré", "mib", "mi", "fa", "fa#", "sol", "sol#", "la", "sib", "si"]
@@ -25,7 +27,7 @@ Toise {
 	property color colorNatural: "transparent"
 
 	// Toise parameters
-	index: note
+	index: note + notes_en.length * octave
 	marks: notes[notes_style]
 	nb_marks_displayed: Math.min(nb_marks, width / theme.fontSizeLarge * 0.8)
 
