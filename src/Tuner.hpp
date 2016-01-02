@@ -12,6 +12,7 @@ class Tuner : public QObject {
 	Q_PROPERTY(double deviation READ GetDeviation NOTIFY deviationChanged)
 	Q_PROPERTY(int note READ GetNote NOTIFY noteChanged)
 	Q_PROPERTY(int octave READ GetOctave NOTIFY octaveChanged)
+	Q_PROPERTY(bool found READ GetFound NOTIFY foundChanged)
 	Q_PROPERTY(QString noteName READ GetNoteName NOTIFY noteNameChanged)
 
 	private:
@@ -23,17 +24,25 @@ class Tuner : public QObject {
 	ZeroCross<int16_t> *cross;
 	Scale *scale;
 
-	bool running;
+	bool running, found;
 	double freq, deviation;
 	int note, octave, nb_sample_running;
+	int note_found, count_found, count_not_found;
 
 	static const int rate = 16000;
 	static const int defaultNbFrame = 1024;
 	static const int defaultFreqMin = 50;
 	static const int defaultFreqMax = 2000;
 	static const int nbSamplePreventRunning = rate * 40; // 40 seconds
+	/// number of analyses to confirm a note
+	static const int nbConfirm = 3;
+	/// number of analyses to drop a note
+	static const int nbDefect = 20;
+
 
 	inline void ComputeFrame(int16_t v);
+	void SetFound(int note, int octave, double deviation);
+	void SetNotFound();
 
 	private slots:
 	void AudioCb(const QAudioBuffer &buffer);
@@ -53,6 +62,7 @@ class Tuner : public QObject {
 	int GetNote();
 	int GetOctave();
 	double GetDeviation();
+	bool GetFound();
 	const char* GetNoteName();
 
 	signals:
@@ -62,4 +72,5 @@ class Tuner : public QObject {
 	void noteNameChanged();
 	void octaveChanged();
 	void deviationChanged();
+	void foundChanged();
 };

@@ -34,6 +34,8 @@ Tuner::Tuner()
 	running = false;
 	freq = deviation = 0;
 	note = octave = 0; 
+	found = false;
+	count_found = count_not_found = 0;
 
 	high_filter = new LinearFilter<int16_t>(3, a10, b10);
 
@@ -70,6 +72,7 @@ Tuner::~Tuner()
 void Tuner::Start()
 {
 	cerr << __func__ << endl;
+	count_found = count_not_found = 0;
 	nb_sample_running = 0;
 	blank_prevent(true);
 	high_filter->Clear();
@@ -101,6 +104,45 @@ void Tuner::AudioCb(const QAudioBuffer &buffer)
 	AudioAnalyse(ptr, nbFrame);
 }
 
+void Tuner::SetFound(int n, int o, double d)
+{
+	if (n != note_found) {
+		note_found = n;
+		count_found = 0;
+		SetNotFound();
+	}
+	else if (count_found++ >= nbConfirm) {
+		count_not_found = 0;
+		if (!found) {
+			found = true;
+			foundChanged();
+		}
+		if (note != n) {
+			note = n;
+			noteChanged();
+		}
+		if (octave != o) {
+			octave = o;
+			octaveChanged();
+		}
+		if (deviation != d) {
+			deviation = d;
+			deviationChanged();
+		}
+	}
+}
+
+void Tuner::SetNotFound()
+{
+	if (count_not_found++ >= nbDefect) {
+		count_found = 0;
+		if (found) {
+			found = false;
+			foundChanged();
+		}
+	}
+}
+
 void Tuner::AudioAnalyse(const int16_t *ptr, int nb_frame)
 {
 	nb_sample_running += nb_frame;
@@ -112,12 +154,13 @@ void Tuner::AudioAnalyse(const int16_t *ptr, int nb_frame)
 		freqChanged();
 
 		if (freq) {
-			note = scale->FindNote(freq, octave, deviation);
-			noteChanged();
-			noteNameChanged();
-			octaveChanged();
-			deviationChanged();
-			//std::cerr << note << " " << scale->NoteName(note) << std::endl;
+			int n, o;
+			double d;
+			n = scale->FindNote(freq, o, d);
+			SetFound(n, o, d);
+		}
+		else { // no freq
+			SetNotFound();
 		}
 	}
 
@@ -163,4 +206,9 @@ int Tuner::GetOctave()
 const char* Tuner::GetNoteName()
 {
 	return scale->NoteName(note);
+}
+
+bool Tuner::GetFound()
+{
+	return found;
 }

@@ -25,7 +25,7 @@ Item {
 		width: Math.min(parent.width, parent.height * 1.5)
 		height: width / 2
 
-		level: tuner.deviation * 100
+		level: tuner.found ? tuner.deviation * 100 : -50
 	}
 
 	ScaleToise {
