@@ -33,11 +33,11 @@ Item {
 		theme: parent.theme
 
 		anchors.top: meter.bottom
-		anchors.topMargin: h_margin
+		anchors.topMargin: h_margin * 2
 		anchors.horizontalCenter: parent.horizontalCenter
 
 		width: meter.width
-		height: width / 10
+		height: Math.max(width / 10, theme.fontSizeLarge * 1.8)
 
 		note: tuner.note + toise.nb_notes * tuner.octave
 	}

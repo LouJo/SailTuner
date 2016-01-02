@@ -27,11 +27,15 @@ Item {
 	property int h_margin: Math.max(height / 8, main_note.border_d)
 
 	property int nb_notes: 12
+	property int nb_notes_displayed: Math.min(nb_notes, width / theme.fontSizeLarge * 0.8)
+
 	/// current note is on the middle
-	property double position: note + (nb_notes + 1) / 2
+	property double position: note - (nb_notes_displayed - 1) / 2
 
 	property int first_note: Math.floor(position) % nb_notes
 	property double delta: position - Math.floor(position)
+
+	onFirst_noteChanged: console.log(first_note + " " + note + " " + nb_notes_displayed + " " + position)
 
 	function note_name(i) {
 		return notes[notes_style][i];
@@ -57,13 +61,13 @@ Item {
 		anchors.right: parent.right
 		anchors.topMargin: h_margin
 		anchors.bottomMargin: h_margin
-		property double cellWidth: parent.width / nb_notes
+		property double cellWidth: parent.width / nb_notes_displayed
 
 		Repeater {
-			model: nb_notes + 1
+			model: nb_notes_displayed + 1
 			Rectangle {
 				width: toise.cellWidth
-				height: parent.height
+				height: toise.height
 				border.width: 1
 				property int note: (index + nb_notes + first_note) % nb_notes
 				color: isAltered(note) ? colorAltered : colorNatural
@@ -83,7 +87,7 @@ Item {
 	Rectangle {
 		id: main_note
 		y: 0
-		x: toise.cellWidth * 5.5 - border_d
+		x: toise.cellWidth * (parent.nb_notes_displayed - 1) / 2  - border_d
 		width: toise.cellWidth + border_d * 2
 		height: parent.height
 
