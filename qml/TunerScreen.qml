@@ -6,6 +6,7 @@ import QtQuick 2.0
  */
 
 Item {
+	id: main
 	/// tuner object
 	property QtObject tuner
 	/// theme corresponding to Silica Theme object
@@ -28,17 +29,23 @@ Item {
 		level: tuner.found ? tuner.deviation * 100 : -50
 	}
 
-	ScaleToise {
-		id: toise
-		theme: parent.theme
-
+	Item {
 		anchors.top: meter.bottom
-		anchors.topMargin: h_margin * 2
-		anchors.horizontalCenter: parent.horizontalCenter
+		anchors.left: parent.left
+		anchors.right: parent.right
+		anchors.bottom: parent.bottom
 
-		width: meter.width
-		height: Math.max(width / 10, theme.fontSizeLarge * 1.8)
+		ScaleToise {
+			id: toise
+			theme: main.theme
 
-		note: tuner.note + toise.nb_notes * tuner.octave
+			anchors.horizontalCenter: parent.horizontalCenter
+			anchors.verticalCenter: parent.verticalCenter
+
+			width: meter.width
+			height: Math.max(width / 10, theme.fontSizeLarge * 1.8)
+
+			note: tuner.note + toise.nb_notes * tuner.octave
+		}
 	}
 }

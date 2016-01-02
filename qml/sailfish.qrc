@@ -5,5 +5,6 @@
 <file>TunerScreen.qml</file>
 <file>CircleMeter.qml</file>
 <file>ScaleToise.qml</file>
+<file>Toise.qml</file>
 </qresource>
 </RCC>
