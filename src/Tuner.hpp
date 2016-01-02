@@ -28,6 +28,8 @@ class Tuner : public QObject {
 	double freq, deviation;
 	int note, octave, nb_sample_running;
 	int note_found, count_found, count_not_found;
+	int nb_deviation, deviation_start;
+	double deviation_sum;
 
 	static const int rate = 16000;
 	static const int defaultNbFrame = 1024;
@@ -38,11 +40,16 @@ class Tuner : public QObject {
 	static const int nbConfirm = 3;
 	/// number of analyses to drop a note
 	static const int nbDefect = 20;
+	/// number of deviation values for average
+	static const int nbDeviationValues = 8;
 
+	double deviation_values[nbDeviationValues];
 
 	inline void ComputeFrame(int16_t v);
 	void SetFound(int note, int octave, double deviation);
 	void SetNotFound();
+	void ResetDeviation();
+	void UpdateDeviation(double d);
 
 	private slots:
 	void AudioCb(const QAudioBuffer &buffer);

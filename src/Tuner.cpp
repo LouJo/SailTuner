@@ -74,6 +74,7 @@ void Tuner::Start()
 	cerr << __func__ << endl;
 	count_found = count_not_found = 0;
 	nb_sample_running = 0;
+	ResetDeviation();
 	blank_prevent(true);
 	high_filter->Clear();
 	cross->Clear();
@@ -104,12 +105,36 @@ void Tuner::AudioCb(const QAudioBuffer &buffer)
 	AudioAnalyse(ptr, nbFrame);
 }
 
+void Tuner::ResetDeviation()
+{
+	// reset deviation values
+	nb_deviation = 0;
+	deviation_start = 0;
+	deviation_sum = 0;
+}
+
+void Tuner::UpdateDeviation(double d)
+{
+	if (nb_deviation == nbDeviationValues) {
+		deviation_sum -= deviation_values[deviation_start];
+		deviation_start = (deviation_start + 1) % nbDeviationValues;
+		nb_deviation--;
+	}
+	deviation_values[(deviation_start + nb_deviation) % nbDeviationValues] = d;
+	nb_deviation++;
+	deviation_sum += d;
+	deviation = deviation_sum / nb_deviation;
+}
+
 void Tuner::SetFound(int n, int o, double d)
 {
 	if (n != note_found) {
 		note_found = n;
 		count_found = 0;
 		SetNotFound();
+
+		ResetDeviation();
+		UpdateDeviation(d);
 	}
 	else if (count_found++ >= nbConfirm) {
 		count_not_found = 0;
@@ -125,10 +150,11 @@ void Tuner::SetFound(int n, int o, double d)
 			octave = o;
 			octaveChanged();
 		}
-		if (deviation != d) {
-			deviation = d;
-			deviationChanged();
-		}
+		UpdateDeviation(d);
+		deviationChanged();
+	}
+	else {
+		UpdateDeviation(d);
 	}
 }
 
@@ -138,6 +164,7 @@ void Tuner::SetNotFound()
 		count_found = 0;
 		if (found) {
 			found = false;
+			ResetDeviation();
 			foundChanged();
 		}
 	}
