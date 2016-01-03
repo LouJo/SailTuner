@@ -41,7 +41,10 @@ Scale::Scale()
 void Scale::updateScale()
 {
 	actualFactor = actualLa / defaultLa;
-	for (int i = 0; i < nbNote; i++) actualNoteFreq[i] = actualFactor * noteFreq[i];
+	for (int i = 0; i < nbNote; i++) {
+		actualNoteFreq[i] = actualFactor * noteFreq[i];
+//		std::cerr << " " << noteFreq[i] << " " << actualNoteFreq[i] << std::endl;
+	}
 	actualRange[0] = actualNoteFreq[0] * pow(halfToneFactor(0, -1),0.5);
 	actualRange[1] = actualNoteFreq[nbNote - 1] * pow(halfToneFactor(nbNote - 1, 1), 0.5);
 
@@ -116,7 +119,7 @@ double Scale::GetLa()
 	return actualLa;
 }
 
-void Scale::SetNotesFrequencies(double freq[nbNote])
+void Scale::SetNotesFrequencies(const double freq[nbNote])
 {
 	memcpy(noteFreq, freq, sizeof(double) * nbNote);
 	updateScale();

@@ -67,7 +67,14 @@ Tuner::Tuner()
 	cross = new ZeroCross<int16_t>(cross_config);
 
 	scale = new Scale();
-	scale->ConstructEqualTemperament();
+
+	temperaments = new Temperaments(":/data");
+	if (temperaments->SetTemperament(0)) {
+		scale->SetNotesFrequencies(temperaments->NotesFrequencies());
+	}
+	else {
+		scale->ConstructEqualTemperament();
+	}
 
 	settings.setCodec("audio/PCM");
 	settings.setChannelCount(1);
@@ -267,6 +274,24 @@ const char* Tuner::GetNoteName()
 bool Tuner::GetFound()
 {
 	return found;
+}
+
+unsigned int Tuner::GetTemperamentIndex()
+{
+	return temperaments->GetCurrentIndex();
+}
+
+void Tuner::SetTemperamentIndex(unsigned int idx)
+{
+	if (temperaments->SetTemperament(idx)) {
+		scale->SetNotesFrequencies(temperaments->NotesFrequencies());
+		temperamentChanged();
+	}
+}
+
+QStringList Tuner::GetTemperamentList() const
+{
+	return temperaments->GetNames();
 }
 
 /// Set a filename to record raw audio stream

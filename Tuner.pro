@@ -21,4 +21,5 @@ HEADERS += \
 	src/scale/Temperaments.hpp
 
 RESOURCES += \
-	qml/desktop.qrc
+	qml/desktop.qrc \
+	data/temperaments.qrc

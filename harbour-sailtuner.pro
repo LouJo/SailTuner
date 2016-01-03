@@ -7,7 +7,8 @@ DEFINES += TARGET=\""$(TARGET")\"
 # PKGCONFIG += libpulse
 
 RESOURCES += \
-	qml/sailfish.qrc
+	qml/sailfish.qrc \
+	data/temperaments.qrc
 
 SOURCES += \
 	src/sailfish.cpp \

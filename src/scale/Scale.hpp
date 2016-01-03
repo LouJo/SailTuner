@@ -52,7 +52,7 @@ class Scale {
 	void ConstructEqualTemperament();
 
 	/// Set notes frequencies from a temperament
-	void SetNotesFrequencies(double freq[nbNote]);
+	void SetNotesFrequencies(const double freq[nbNote]);
 
 	double GetLa();
 	void SetLa(double la);

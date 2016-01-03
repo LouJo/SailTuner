@@ -23,6 +23,7 @@
 #include "audio/LinearFilter.hpp"
 #include "audio/ZeroCross.hpp"
 #include "scale/Scale.hpp"
+#include "scale/Temperaments.hpp"
 
 class Tuner : public QObject {
 	Q_OBJECT
@@ -33,6 +34,8 @@ class Tuner : public QObject {
 	Q_PROPERTY(int octave READ GetOctave NOTIFY octaveChanged)
 	Q_PROPERTY(bool found READ GetFound NOTIFY foundChanged)
 	Q_PROPERTY(QString noteName READ GetNoteName NOTIFY noteNameChanged)
+	Q_PROPERTY(int temperament_idx READ GetTemperamentIndex WRITE SetTemperamentIndex NOTIFY temperamentChanged)
+	Q_PROPERTY(QStringList temperament_list READ GetTemperamentList)
 
 	private:
 	QAudioRecorder *recorder;
@@ -42,6 +45,7 @@ class Tuner : public QObject {
 	LinearFilter<int16_t> *high_filter;
 	ZeroCross<int16_t> *cross;
 	Scale *scale;
+	Temperaments *temperaments;
 	static const char *filename_record;
 	std::ofstream file_record;
 
@@ -92,6 +96,9 @@ class Tuner : public QObject {
 	double GetDeviation();
 	bool GetFound();
 	const char* GetNoteName();
+	unsigned int GetTemperamentIndex();
+	void SetTemperamentIndex(unsigned int idx);
+	QStringList GetTemperamentList() const;
 
 	/// analyse a file for debug
 	static void analyse_file(const char *filename);
@@ -106,4 +113,5 @@ class Tuner : public QObject {
 	void octaveChanged();
 	void deviationChanged();
 	void foundChanged();
+	void temperamentChanged();
 };

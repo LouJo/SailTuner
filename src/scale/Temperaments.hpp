@@ -18,7 +18,7 @@
 #ifndef __TEMPERAMENTS_HPP
 #define __TEMPERAMENTS_HPP
 
-#include <string>
+#include <QString>
 #include <vector>
 
 /**
@@ -31,8 +31,8 @@ class Temperaments {
 	private:
 	/// describe internal a temperament
 	struct temp_t {
-		std::string name; ///< temperament name
-		std::string file; ///< file name
+		QString name; ///< temperament name
+		QString file; ///< file name
 		int seek; ///< position in file
 	};
 
@@ -42,21 +42,24 @@ class Temperaments {
 	std::vector<temp_t> list;
 	double notes[nb_notes];
 
-	void GetDir(const char *dirname);
-	void CheckFile(std::string filename);
-	void GetTemperament(const temp_t temperament);
+	void GetDir(const QString & dirname);
+	void CheckFile(const QString & filename);
+	bool CheckoutTemperament(const temp_t & temperament);
 
 	public:
 	/// constructor with dir name to find data files
-	Temperaments(const char * dirname);
+	Temperaments(const QString & dirname);
 	~Temperaments();
 
 	/// set current temperament
-	bool SetTemperament(std::string name);
+	bool SetTemperament(const QString name);
+	bool SetTemperament(unsigned int index);
+	/// get index of current temperament
+	unsigned int GetCurrentIndex() const;
 	/// get the name of current temperament
-	std::string GetCurrentName() const;
+	QString GetCurrentName() const;
 	/// get the name of temperament number n
-	std::string GetName(unsigned int n) const;
+	QStringList GetNames() const;
 	/// get notes frequencies as double[nb_notes]
 	const double * NotesFrequencies() const;
 };
