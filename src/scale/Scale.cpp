@@ -18,6 +18,8 @@
 #include <assert.h>
 #include <math.h>
 #include <iostream>
+#include <string.h>
+
 #include "Scale.hpp"
 
 const char * Scale::noteNames[] = {
@@ -112,6 +114,12 @@ void Scale::ConstructEqualTemperament()
 double Scale::GetLa()
 {
 	return actualLa;
+}
+
+void Scale::SetNotesFrequencies(double freq[nbNote])
+{
+	memcpy(noteFreq, freq, sizeof(double) * nbNote);
+	updateScale();
 }
 
 void Scale::SetLa(double la)

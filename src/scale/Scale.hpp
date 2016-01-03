@@ -51,6 +51,9 @@ class Scale {
 
 	void ConstructEqualTemperament();
 
+	/// Set notes frequencies from a temperament
+	void SetNotesFrequencies(double freq[nbNote]);
+
 	double GetLa();
 	void SetLa(double la);
 
@@ -58,7 +61,6 @@ class Scale {
 	 * Find nearest note, octave, and deviation
 	 */
 	int FindNote(double freq, int &octave, double &deviation);
-
 
 	static const char * NoteName(int note);
 };
