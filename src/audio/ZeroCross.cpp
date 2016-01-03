@@ -13,6 +13,9 @@ using namespace patterns;
 #define CORRECT_TIME_DEVIATION 1
 /// max factor of deviation to consider multiple to be dropped
 #define MAX_TIME_DEVIATION_FACTOR_MULTIPLE 2
+/// Correct pattern, good enough to drop every lower
+#define CORRECT_TIME_DEVIATION_NO_LOWER 0.001
+
 //#define CORRECT_ENERGY_DEVIATION 1
 
 // local functions
@@ -70,18 +73,18 @@ PatternMatch FindPattern(const vector<Pattern> &values, double pattern_min, doub
 		if (interval > pattern_max) break;
 
 		res = IsPattern(values, interval);
-		// cout << "  " << res.time << " " << 16000/res.time << " " << res.time_deviation << " " << res.energy_deviation << endl;
-		if (res.time && (res.time_deviation < best.time_deviation || best.time == 0)) {
-			if (best.time && best.time_deviation < CORRECT_TIME_DEVIATION && best.time_deviation / res.time_deviation < MAX_TIME_DEVIATION_FACTOR_MULTIPLE) {
+	//	cout << "  " << res.time << " " << 16000/res.time << " " << res.time_deviation << " " << res.energy_deviation << endl;
+		if (res.time && ((res.time_deviation < best.time_deviation && best.time_deviation > CORRECT_TIME_DEVIATION_NO_LOWER) || best.time == 0)) {
+			if (best.time && best.time_deviation < CORRECT_TIME_DEVIATION  && best.time_deviation / res.time_deviation < MAX_TIME_DEVIATION_FACTOR_MULTIPLE) {
 				double div = res.time / best.time;
 				// it is a multiple of previous
 				if (fabs(div - round(div)) < EPS_DIVISOR) continue;
-//				cout << "... " << div - floor(div) << endl;
+				//cout << "... " << div - floor(div) << endl;
 			}
 			best = res;
 		}
 	}
-	//cerr << " -> " << best.first << " " << best.second << endl;
+	//cout << " -> " << best.time << " " << best.time_deviation << endl;
 	if (best.time_deviation > CORRECT_TIME_DEVIATION) return PatternMatch(); // empty pattern
 	return best;
 }

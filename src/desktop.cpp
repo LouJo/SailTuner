@@ -22,7 +22,10 @@ static void analyse_file(const char *filename)
 		fin.read((char*) buffer, sizeof(buffer));
 		tuner->AudioAnalyse(buffer, sizeof(buffer) >> 1);
 
-		cout << tuner->GetFreq() << " " << tuner->GetNoteName() << " " << tuner->GetOctave() << endl;
+		cout << tuner->GetFreq() << " ";
+		if (tuner->GetFound())
+			cout	<< tuner->GetNoteName() << "   " << tuner->GetOctave() << "   " << tuner->GetDeviation();
+		cout << endl;
 
 		if (fin.eof()) break;
 	}
