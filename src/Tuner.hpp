@@ -1,6 +1,8 @@
 #include <QAudioRecorder>
 #include <QAudioProbe>
 
+#include <fstream>
+
 #include "audio/LinearFilter.hpp"
 #include "audio/ZeroCross.hpp"
 #include "scale/Scale.hpp"
@@ -23,6 +25,8 @@ class Tuner : public QObject {
 	LinearFilter<int16_t> *high_filter;
 	ZeroCross<int16_t> *cross;
 	Scale *scale;
+	static const char *filename_record;
+	std::ofstream file_record;
 
 	bool running, found;
 	double freq, deviation;
@@ -71,6 +75,11 @@ class Tuner : public QObject {
 	double GetDeviation();
 	bool GetFound();
 	const char* GetNoteName();
+
+	/// analyse a file for debug
+	static void analyse_file(const char *filename);
+	/// write a file with raw audio
+	static void set_record(const char *filename_record);
 
 	signals:
 	void runningChanged();

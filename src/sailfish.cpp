@@ -27,6 +27,14 @@ class Main {
 
 Q_DECL_EXPORT int main(int argc, char* argv[])
 {
+	if (argc == 2) {
+		Tuner::analyse_file(argv[1]);
+		return 0;
+	}
+	else if (argc == 3 && strcmp(argv[1], "record") == 0) {
+		Tuner::set_record(argv[2]);
+	}
+
 	qmlRegisterType<Tuner>("harbour.sailtuner.tuner", 1, 0, "Tuner");
 	Main *appli = new Main(argc, argv);
 	return appli->Launch();

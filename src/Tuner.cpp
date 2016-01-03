@@ -6,6 +6,9 @@
 #include <QDBusConnection>
 #include <QDBusInterface>
 
+#include <iostream>
+#include <fstream>
+
 #include "Tuner.hpp"
 
 using namespace std;
@@ -13,6 +16,8 @@ using namespace std;
 // high 10hz / 16k
 static double a10[] = { 1        , -2.99214602,  2.98432286, -0.99217678 };
 static double b10[] = { 0.99608071, -2.98824212,  2.98824212, -0.99608071 };
+
+const char * Tuner::filename_record = NULL;
 
 // function to prevent screen blank
 
@@ -36,6 +41,8 @@ Tuner::Tuner()
 	note = octave = 0; 
 	found = false;
 	count_found = count_not_found = 0;
+
+	if (filename_record) file_record.open(filename_record);
 
 	high_filter = new LinearFilter<int16_t>(3, a10, b10);
 
@@ -63,6 +70,7 @@ Tuner::Tuner()
 
 Tuner::~Tuner()
 {
+	if (filename_record && file_record.is_open()) file_record.close();
 	delete high_filter;
 	delete cross;
 	delete recorder;
@@ -176,6 +184,8 @@ void Tuner::AudioAnalyse(const int16_t *ptr, int nb_frame)
 {
 	nb_sample_running += nb_frame;
 
+	if (filename_record && file_record.is_open()) file_record.write((char*) ptr, nb_frame * sizeof(int16_t));
+
 	while (nb_frame--) ComputeFrame(*ptr++);
 
 	if (freq != cross->Freq()) {
@@ -240,4 +250,37 @@ const char* Tuner::GetNoteName()
 bool Tuner::GetFound()
 {
 	return found;
+}
+
+/// Set a filename to record raw audio stream
+
+void Tuner::set_record(const char *f)
+{
+	filename_record = f;
+}
+
+/// analyse a file (static function)
+void Tuner::analyse_file(const char *filename)
+{
+	cout << "analyse file " << filename << endl;
+	ifstream fin;
+	fin.open(filename);
+
+	const int nb_frame = 1024;
+	Tuner *tuner = new Tuner();
+	int16_t buffer[nb_frame];
+
+	while (1) {
+		fin.read((char*) buffer, sizeof(buffer));
+		tuner->AudioAnalyse(buffer, sizeof(buffer) >> 1);
+
+		cout << tuner->GetFreq() << " ";
+		if (tuner->GetFound())
+			cout	<< tuner->GetNoteName() << "   " << tuner->GetOctave() << "   " << tuner->GetDeviation();
+		cout << endl;
+
+		if (fin.eof()) break;
+	}
+	fin.close();
+	delete tuner;
 }
