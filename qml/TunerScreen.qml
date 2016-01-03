@@ -33,7 +33,7 @@ Item {
 		width: meter.width / 12
 		height: width
 		led_color: dev_is_ok ? led_green : led_red
-		visible: tuner.found && (dev_is_ok || tuner.deviation < 0)
+		on: tuner.found && (dev_is_ok || tuner.deviation < 0)
 	}
 
 	Led {
@@ -44,7 +44,7 @@ Item {
 		width: meter.width / 12
 		height: width
 		led_color: dev_is_ok ? led_green : led_red
-		visible: tuner.found && (dev_is_ok || tuner.deviation > 0)
+		on: tuner.found && (dev_is_ok || tuner.deviation > 0)
 	}
 
 	CircleMeter {
