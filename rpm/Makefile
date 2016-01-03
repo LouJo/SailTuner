@@ -1,5 +1,10 @@
 # helper to build for Sailfish with sdk engine
 
+# to add pulseaudio dev to MerSDK:
+# sudo zypper in pulseaudio-devel
+# sb2 -t SailfishOS-i486-x86 -m sdk-install -R zypper in pulseaudio-devel
+# sb2 -t SailfishOS-armv7hl -m sdk-install -R zypper in pulseaudio-devel
+
 SAILFISHOS_DIR = $(HOME)/SailfishOS
 
 SSH_KEYS_DIR = $(SAILFISHOS_DIR)/vmshare/ssh/private_keys

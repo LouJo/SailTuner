@@ -3,6 +3,8 @@ TARGET = Tuner
 
 CONFIG += c++11
 
+# PKGCONFIG += libpulse
+
 SOURCES += \
 	src/desktop.cpp \
 	src/Tuner.cpp \

@@ -4,6 +4,7 @@ TARGET = harbour-sailtuner
 CONFIG += c++11 sailfishapp sailfishapp_i18n sailfishapp_no_deploy_qml
 
 DEFINES += TARGET=\""$(TARGET")\"
+# PKGCONFIG += libpulse
 
 RESOURCES += \
 	qml/sailfish.qrc
