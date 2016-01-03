@@ -19,7 +19,7 @@ Item {
 	property bool is_portrait: height > width
 
 	// maximum absolute deviation to display green led
-	property double deviation_ok: 0.1
+	property double deviation_ok: 0.05
 	property color led_green: "green"
 	property color led_red: "red"
 
