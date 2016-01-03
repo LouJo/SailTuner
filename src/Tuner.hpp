@@ -27,7 +27,7 @@ class Tuner : public QObject {
 	bool running, found;
 	double freq, deviation;
 	int note, octave, nb_sample_running;
-	int note_found, count_found, count_not_found;
+	int note_found, octave_found, count_found, count_not_found;
 	int nb_deviation, deviation_start;
 	double deviation_sum;
 

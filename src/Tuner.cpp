@@ -74,6 +74,7 @@ void Tuner::Start()
 	cerr << __func__ << endl;
 	count_found = count_not_found = 0;
 	nb_sample_running = 0;
+	note_found = octave_found = -1;
 	ResetDeviation();
 	blank_prevent(true);
 	high_filter->Clear();
@@ -123,13 +124,13 @@ void Tuner::UpdateDeviation(double d)
 	deviation_values[(deviation_start + nb_deviation) % nbDeviationValues] = d;
 	nb_deviation++;
 	deviation_sum += d;
-	deviation = deviation_sum / nb_deviation;
 }
 
 void Tuner::SetFound(int n, int o, double d)
 {
-	if (n != note_found) {
+	if (n != note_found || o != octave_found) {
 		note_found = n;
+		octave_found = o;
 		count_found = 0;
 		SetNotFound();
 
@@ -151,6 +152,7 @@ void Tuner::SetFound(int n, int o, double d)
 			octaveChanged();
 		}
 		UpdateDeviation(d);
+		deviation = deviation_sum / nb_deviation;
 		deviationChanged();
 	}
 	else {

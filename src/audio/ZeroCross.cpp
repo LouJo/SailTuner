@@ -73,7 +73,7 @@ PatternMatch FindPattern(const vector<Pattern> &values, double pattern_min, doub
 		if (interval > pattern_max) break;
 
 		res = IsPattern(values, interval);
-	//	cout << "  " << res.time << " " << 16000/res.time << " " << res.time_deviation << " " << res.energy_deviation << endl;
+		//cout << "  " << res.time << " " << 16000/res.time << " " << res.time_deviation << " " << res.energy_deviation << endl;
 		if (res.time && ((res.time_deviation < best.time_deviation && best.time_deviation > CORRECT_TIME_DEVIATION_NO_LOWER) || best.time == 0)) {
 			if (best.time && best.time_deviation < CORRECT_TIME_DEVIATION  && best.time_deviation / res.time_deviation < MAX_TIME_DEVIATION_FACTOR_MULTIPLE) {
 				double div = res.time / best.time;
