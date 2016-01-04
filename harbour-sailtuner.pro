@@ -13,6 +13,7 @@ RESOURCES += \
 SOURCES += \
 	src/sailfish.cpp \
 	src/Tuner.cpp \
+	src/TunerWorker.cpp \
 	src/audio/LinearFilter.cpp \
 	src/audio/ZeroCross.cpp \
 	src/scale/Scale.cpp \
@@ -20,6 +21,7 @@ SOURCES += \
 
 HEADERS += \
 	src/Tuner.hpp \
+	src/TunerWorker.hpp \
 	src/audio/LinearFilter.hpp \
 	src/audio/ZeroCross.hpp \
 	src/scale/Scale.hpp \

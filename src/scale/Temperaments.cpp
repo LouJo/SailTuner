@@ -69,7 +69,7 @@ void Temperaments::CheckFile(const QString & filename)
 		}
 		// add temperament
 		name = line.left(offset);
-		qDebug() << " -> add temperament" << name;
+		//qDebug() << " -> add temperament" << name;
 		list.push_back(temp_t{name, filename, f_pos});
 	}
 }

@@ -19,6 +19,7 @@
 #define __TEMPERAMENTS_HPP
 
 #include <QString>
+#include <QStringList>
 #include <vector>
 
 /**

@@ -36,6 +36,7 @@ const char * Scale::NoteName(int note)
 Scale::Scale()
 {
 	actualLa = defaultLa;
+	freq_setted = false;
 }
 
 void Scale::updateScale()
@@ -80,6 +81,10 @@ int Scale::findOctave(double &freq)
 int Scale::FindNote(double freq, int &octave, double &deviation)
 {
 	assert (freq > 0);
+	if (!freq_setted) {
+		std::cerr << "Scale " << __func__ << ": notes not setted" << std::endl;
+		ConstructEqualTemperament();
+	}
 
 	int note = 0;
 	octave = findOctave(freq);
@@ -111,6 +116,7 @@ void Scale::ConstructEqualTemperament()
 		noteFreq[i] = defaultLa * pow(2, (double) (i - la) / 12);
 		//std::cerr << noteFreq[i] << std::endl;
 	}
+	freq_setted = true;
 	updateScale();
 }
 
@@ -121,6 +127,8 @@ double Scale::GetLa()
 
 void Scale::SetNotesFrequencies(const double freq[nbNote])
 {
+	std::cout << __func__ << std::endl;
+	freq_setted = true;
 	memcpy(noteFreq, freq, sizeof(double) * nbNote);
 	updateScale();
 }

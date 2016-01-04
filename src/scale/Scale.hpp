@@ -22,16 +22,18 @@
  * Note recognition within a temperament
  */
 class Scale {
+	public:
+	static const int defaultLa = 440;
 	private:
 	static const int nbNote = 12;
 	static const int cmpOctave = 4;
-	static const int defaultLa = 440;
 
 	static const char *noteNames[nbNote];
 
 	double noteFreq[nbNote], actualNoteFreq[nbNote];
 	double actualLa, actualFactor;
 	double actualRange[2]; // freq range for default octave
+	bool freq_setted;
 
 	/// update scale after temperament or default la change
 	void updateScale();

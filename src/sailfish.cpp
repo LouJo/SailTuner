@@ -45,7 +45,7 @@ class Main {
 Q_DECL_EXPORT int main(int argc, char* argv[])
 {
 	if (argc == 2) {
-		Tuner::analyse_file(argv[1]);
+		TunerWorker::analyse_file(argv[1]);
 		return 0;
 	}
 	else if (argc == 3 && strcmp(argv[1], "record") == 0) {
