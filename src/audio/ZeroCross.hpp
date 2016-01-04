@@ -53,10 +53,14 @@ template<typename sample_t> class ZeroCross {
 
 	public:
 	ZeroCross(const Config &config);
+	/// analyse audio buffer
 	double operator() (sample_t *ptr, int nbFrame);
+	/// analyse one audio sample
 	void operator() (sample_t v);
 
+	/// Clear stream analyse
 	void Clear();
+	/// Get current frequency computed
 	double Freq();
 };
 

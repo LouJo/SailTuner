@@ -42,14 +42,17 @@ class Temperaments {
 	std::vector<temp_t> list;
 	double notes[nb_notes];
 
+	/// Check data files in directory
 	void GetDir(const QString & dirname);
+	/// Check temperaments in file
 	void CheckFile(const QString & filename);
+	/// Load given temperament
 	bool CheckoutTemperament(const temp_t & temperament);
 
 	public:
 	/// constructor with dir name to find data files
 	Temperaments(const QString & dirname);
-	~Temperaments();
+	~Temperaments() {}
 
 	/// set current temperament
 	bool SetTemperament(const QString name);

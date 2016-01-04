@@ -27,11 +27,21 @@ template<typename A> class LinearFilter {
 	double *backx, *backy;
 
 	public:
+	/**
+	 * filter constructor
+	 *
+	 * @param order Order of filter (2 = biquads)
+	 * @param a Array of a coefficiants
+	 * @param b Array of b coefficiants
+	 */
 	LinearFilter(int order, double *a, double *b);
 	~LinearFilter();
 
+	/// Clear audio stream
 	void Clear();
+	/// Compute one audio sample
 	A operator() (A x);
+	/// Compute an audio buffer in place
 	void operator() (A *ptr, int nbFrame);
 };
 

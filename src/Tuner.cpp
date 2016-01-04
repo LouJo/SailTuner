@@ -58,6 +58,8 @@ Tuner::Tuner()
 	note = octave = 0; 
 	found = false;
 	count_found = count_not_found = 0;
+	nb_sample_running = 0;
+	note_found = octave_found = -1;
 
 	if (filename_record) file_record.open(filename_record);
 
@@ -98,7 +100,9 @@ Tuner::~Tuner()
 	delete high_filter;
 	delete cross;
 	delete recorder;
+	delete probe;
 	delete scale;
+	delete temperaments;
 }
 
 void Tuner::Start()
@@ -208,25 +212,30 @@ void Tuner::AudioAnalyse(const int16_t *ptr, int nb_frame)
 {
 	nb_sample_running += nb_frame;
 
+	// record in file is needed
 	if (filename_record && file_record.is_open()) file_record.write((char*) ptr, nb_frame * sizeof(int16_t));
 
+	// compute every audio frame
 	while (nb_frame--) ComputeFrame(*ptr++);
 
+	// update frequency
 	if (freq != cross->Freq()) {
 		freq = cross->Freq();
 		freqChanged();
-
-		if (freq) {
-			int n, o;
-			double d;
-			n = scale->FindNote(freq, o, d);
-			SetFound(n, o, d);
-		}
-		else { // no freq
-			SetNotFound();
-		}
 	}
 
+	// find note, octave, deviation
+	if (freq) {
+		int n, o = 0;
+		double d = 0;
+		n = scale->FindNote(freq, o, d);
+		SetFound(n, o, d);
+	}
+	else { // no freq
+		SetNotFound();
+	}
+
+	// prevent screen blanking
 	if (nb_sample_running >= nbSamplePreventRunning && running) {
 		nb_sample_running = 0;
 		blank_prevent(true);

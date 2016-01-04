@@ -105,8 +105,11 @@ bool Temperaments::SetTemperament(unsigned int index)
 		qDebug() << __func__ << "index" << index << "out of range";
 		return false;
 	}
-	current = index;
-	return CheckoutTemperament(list[current]);
+	if (CheckoutTemperament(list[index])) {
+		current = index;
+		return true;
+	}
+	return false;
 }
 
 bool Temperaments::SetTemperament(const QString name)
