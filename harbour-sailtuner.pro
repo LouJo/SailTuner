@@ -1,11 +1,11 @@
 QT += qml quick gui multimedia dbus
 TARGET = harbour-sailtuner
 
-CONFIG += c++11 sailfishapp sailfishapp_i18n sailfishapp_no_deploy_qml link_pkgconfig
+CONFIG += c++11 link_pkgconfig sailfishapp sailfishapp_i18n sailfishapp_no_deploy_qml
 
 DEFINES += TARGET=\""$(TARGET")\"
 
-PKGCONFIG += libpulse
+PKGCONFIG += libpulse-simple
 
 RESOURCES += \
 	qml/sailfish.qrc \
