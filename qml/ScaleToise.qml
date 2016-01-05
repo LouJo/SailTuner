@@ -46,7 +46,7 @@ Toise {
 	// Toise parameters
 	index: note + notes_en.length * octave
 	marks: notes[notes_style]
-	nb_marks_displayed: Math.min(nb_marks, width / theme.fontSizeLarge * 0.8)
+	nb_marks_displayed: width > 100 ? Math.min(nb_marks, width / theme.fontSizeLarge * 0.8) : 1
 
 	mark_color: function(note) {
 		if (isAltered(note)) return colorAltered;

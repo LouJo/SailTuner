@@ -84,8 +84,8 @@ Item {
 		id: note_info
 
 		anchors.top: meter.bottom
-		anchors.left: parent.left
-		anchors.right: parent.right
+		anchors.left: meter.left
+		anchors.right: meter.right
 		anchors.bottom: parent.bottom
 
 		property int toise_h: Math.max(width / 10, theme.fontSizeLarge * 1.8)
@@ -110,9 +110,11 @@ Item {
 
 			anchors.top: main.is_portrait ? title_note.bottom : parent.top
 			anchors.topMargin: parent.margin_h
-			anchors.horizontalCenter: parent.horizontalCenter
 
-			width: meter.width
+			anchors.left: parent.left
+			anchors.leftMargin: is_portrait ? 0 : parent.width / 20
+
+			width: is_portrait ? meter.width : meter.width * 2 / 3
 			height: parent.toise_h
 
 			note: tuner.note
@@ -134,18 +136,17 @@ Item {
 
 		// octave toise
 		Toise {
-			anchors.top: main.is_portrait ? title_octave.bottom : toise.bottom
+			anchors.top: main.is_portrait ? title_octave.bottom : parent.top
 			anchors.topMargin: parent.margin_h
-			anchors.horizontalCenter: parent.horizontalCenter
 
-			visible: main.is_portrait
-
+			anchors.right: parent.right
+			anchors.rightMargin: is_portrait ? (parent.width - width) / 2 : parent.width / 20
 			theme: main.theme
 
-			marks: [1, 2, 3, 4, 5, 6, 7, 8, 9]
-			nb_marks_displayed: 4
+			marks: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
+			nb_marks_displayed: is_portrait ? 4 : 3
 
-			width: meter.width / 2
+			width: is_portrait ? meter.width / 2 : parent.width / 6
 			height: parent.toise_h
 
 			index: tuner.octave

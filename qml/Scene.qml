@@ -24,7 +24,7 @@ import QtQuick 2.0
 
 Item {
 	width: 600
-	height: 450
+	height: 200
 
 	DesktopTheme {
 		id: theme

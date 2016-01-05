@@ -40,6 +40,7 @@ Item {
 	property int nb_marks: marks.length
 
 	property int nb_marks_displayed: nb_marks
+	property bool is_pair: nb_marks_displayed % 2 == 0
 
 	/// current mark is on the middle
 	property double position: index - (nb_marks_displayed - 1) / 2
@@ -58,7 +59,7 @@ Item {
 		id: toise
 		anchors.top: parent.top
 		anchors.left: parent.left
-		anchors.leftMargin: - cellWidth * delta
+		anchors.leftMargin: is_pair ? - cellWidth * delta : 0
 		anchors.bottom: parent.bottom
 		anchors.right: parent.right
 		anchors.topMargin: h_margin
@@ -67,7 +68,7 @@ Item {
 		property double cellWidth: parent.width / nb_marks_displayed
 
 		Repeater {
-			model: nb_marks_displayed + 1
+			model: is_pair ? nb_marks_displayed + 1 : nb_marks_displayed
 			Rectangle {
 				width: toise.cellWidth
 				height: toise.height
