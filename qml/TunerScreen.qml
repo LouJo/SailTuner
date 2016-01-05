@@ -152,4 +152,21 @@ Item {
 			index: tuner.octave
 		}
 	}
+
+	// frequency and temperament
+	Column {
+		x: is_portrait ? theme.paddingLarge : meter.x + meter.width / 6
+		y: is_portrait ? theme.paddingLarge : meter.y + meter.height - theme.fontSizeSmall * 4 - theme.paddingLarge
+		width: parent.width * 0.4
+		height: width / 2
+
+		Text {
+			text: tuner.la + " hz"
+			font.pixelSize: theme.fontSizeSmall
+		}
+		Text {
+			text: tuner.temperament_list[tuner.temperament_idx]
+			font.pixelSize: theme.fontSizeSmall
+		}
+	}
 }

@@ -34,9 +34,11 @@ Item {
 		id: tuner
 		property int note: 2
 		property int octave: 4
-		property double freq: 440
+		property double la: 440
 		property double deviation: 0.12
 		property bool found: true
+		property variant temperament_list: ["Weikmeister III", "equal"]
+		property int temperament_idx: 0
 	}
 
 	TunerScreen {
