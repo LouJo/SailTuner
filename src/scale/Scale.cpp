@@ -137,5 +137,5 @@ void Scale::SetLa(double la)
 {
 	assert(la > 0);
 	actualLa = la;
-	updateScale();
+	if (freq_setted) updateScale();
 }

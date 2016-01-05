@@ -58,13 +58,19 @@ PitchDetection::PitchDetection()
 	scale = new Scale();
 	temperaments = new Temperaments(":/data");
 
+	/*
+	 * done by worker before first frame,
+	 * and protected in scale: construct equal if nothing
+	 * on first analyse
+	 */
+	/*
 	if (temperaments->SetTemperament(0)) {
 		scale->SetNotesFrequencies(temperaments->NotesFrequencies());
 	}
 	else {
 		scale->ConstructEqualTemperament();
 	}
-
+*/
 	Reset();
 }
 
@@ -214,6 +220,7 @@ void PitchDetection::analyse_file(const char *filename)
 
 	const int nb_frame = 1024;
 	PitchDetection *pitch = new PitchDetection();
+	pitch->SetTemperament(0);
 	int16_t buffer[nb_frame];
 	PitchResult result;
 

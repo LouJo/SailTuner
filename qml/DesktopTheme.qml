@@ -27,4 +27,6 @@ Item {
 	property int fontSizeMedium: 16
 	property int fontSizeLarge: 25
 	property int fontSizeExtraLarge: 40
+
+	property string icon_pause: "qrc://images/icon-m-pause.svg"
 }

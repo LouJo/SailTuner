@@ -40,8 +40,6 @@ Item {
 	property color led_green: "green"
 	property color led_red: "red"
 
-	opacity: tuner.running ? 1 : 0.8
-
 	property bool dev_is_ok: Math.abs(tuner.deviation) <= deviation_ok
 
 	Led {
@@ -155,6 +153,7 @@ Item {
 
 	// frequency and temperament
 	Column {
+		id: freq_temp
 		x: is_portrait ? theme.paddingLarge : meter.x + meter.width / 6
 		y: is_portrait ? theme.paddingLarge : meter.y + meter.height - theme.fontSizeSmall * 4 - theme.paddingLarge
 		width: parent.width * 0.4
@@ -163,10 +162,23 @@ Item {
 		Text {
 			text: tuner.la + " hz"
 			font.pixelSize: theme.fontSizeSmall
+			color: theme.secondaryColor
 		}
 		Text {
 			text: tuner.temperament_list[tuner.temperament_idx]
 			font.pixelSize: theme.fontSizeSmall
+			color: theme.secondaryColor
 		}
+	}
+
+	// icon for pause status
+	Image {
+		visible: !tuner.running
+
+		x: is_portrait ? parent.width - freq_temp.x - width : parent.width - freq_temp.x - width * 2
+		y: freq_temp.y
+		width: theme.iconSizeMedium
+		height: width
+		source: theme.icon_pause ? theme.icon_pause : "image://theme/icon-m-pause?" + theme.secondaryColor
 	}
 }

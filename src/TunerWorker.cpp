@@ -57,7 +57,7 @@ TunerWorker::TunerWorker() :
 	running(false),
 	quit(false),
 	la_to_update(0),
-	temperament_to_update(-1)
+	temperament_to_update(0) // update the first time in every cases
 {
 	//qRegisterMetaType<PitchDetection::PitchResult>("PitchDetection::PitchResult");
 }
@@ -183,11 +183,15 @@ void TunerWorker::Entry()
 			pa_simple_flush(p_simple, NULL);
 		}
 
-		// if srteam was stopped, reset analyse
+		// if stream was stopped, reset analyse
 		if (new_stream) {
 			pitchDetection->Reset();
+			blank_prevent(true);
 			nb_sample_running = 0;
 			new_stream = false;
+			// send a not-found result on restart
+			result.found = false;
+			emit resultUpdated(result);
 		}
 
 		// get audio data
