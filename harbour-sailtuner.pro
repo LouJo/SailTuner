@@ -12,6 +12,7 @@ RESOURCES += \
 
 SOURCES += \
 	src/sailfish.cpp \
+	src/PitchDetection.cpp \
 	src/Tuner.cpp \
 	src/TunerWorker.cpp \
 	src/audio/LinearFilter.cpp \
@@ -20,6 +21,8 @@ SOURCES += \
 	src/scale/Temperaments.cpp
 
 HEADERS += \
+	src/PitchDetection.hpp \
+	src/Tuner.cpp \
 	src/Tuner.hpp \
 	src/TunerWorker.hpp \
 	src/audio/LinearFilter.hpp \

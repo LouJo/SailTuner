@@ -18,8 +18,10 @@
 #ifndef _TUNER_HPP
 #define _TUNER_HPP
 
+#include <QStringList>
+
+#include "PitchDetection.hpp"
 #include "TunerWorker.hpp"
-#include "scale/Temperaments.hpp"
 
 class Tuner : public QObject {
 	Q_OBJECT
@@ -30,17 +32,18 @@ class Tuner : public QObject {
 	Q_PROPERTY(int octave READ GetOctave NOTIFY resultChanged)
 	Q_PROPERTY(bool found READ GetFound NOTIFY foundChanged)
 	Q_PROPERTY(int temperament_idx READ GetTemperamentIndex WRITE SetTemperamentIndex NOTIFY temperamentChanged)
-	Q_PROPERTY(QStringList temperament_list READ GetTemperamentList)
+	Q_PROPERTY(QStringList temperament_list READ GetTemperamentList NOTIFY temperamentListChanged)
 	Q_PROPERTY(double la READ GetLa WRITE SetLa NOTIFY laChanged)
 
 	private:
-	Temperaments *temperaments;
 	TunerWorker *worker;
 	QThread workerThread;
 
-	bool running, found;
-	double freq, deviation, la;
-	int note, octave;
+	PitchDetection::PitchResult result;
+	QStringList temperament_list;
+	bool running;
+	double la;
+	int temperament_idx;
 
 	public:
 	Tuner();
@@ -54,27 +57,30 @@ class Tuner : public QObject {
 	double GetDeviation();
 	bool GetFound();
 	unsigned int GetTemperamentIndex();
-	void SetTemperamentIndex(unsigned int idx);
+	void SetTemperamentIndex(int idx);
 	QStringList GetTemperamentList() const;
 	double GetLa();
 	void SetLa(double la);
 
 	public slots:
-	void ResultFound(int note, int octave, double deviation, double frequency);
-	void ResultNotFound(double freq);
+	// slots from worker
+	void ResultUpdated(const PitchDetection::PitchResult &result);
+	void TemperamentListUpdated(const QStringList &list);
 
 	signals:
+	// signals to UI
 	void runningChanged();
 	void foundChanged();
-	void temperamentChanged();
 	void laChanged();
 	void resultChanged();
+	void temperamentChanged();
+	void temperamentListChanged();
 
 	// signals to worker
 	void quit();
 	void start();
 	void stop();
-	void setNotesFrequencies(const double *freq);
+	void setTemperamentIndex(int idx);
 	void setLa(double la_freq);
 };
 

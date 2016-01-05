@@ -120,6 +120,7 @@ template<typename A> ZeroCross<A>::ZeroCross(const Config &config)
 
 template<typename sample_t> void ZeroCross<sample_t>::Clear()
 {
+	last_sample = 0;
 	pattern_current.time = -1;
 	nb_frame_analysed = 0;
 	freq = 0;

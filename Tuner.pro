@@ -7,6 +7,7 @@ CONFIG += c++11 debug
 
 SOURCES += \
 	src/desktop.cpp \
+	src/PitchDetection.cpp \
 	src/Tuner.cpp \
 	src/TunerWorker.cpp \
 	src/audio/LinearFilter.cpp \
@@ -15,6 +16,7 @@ SOURCES += \
 	src/scale/Temperaments.cpp
 
 HEADERS += \
+	src/PitchDetection.hpp \
 	src/Tuner.hpp \
 	src/TunerWorker.hpp \
 	src/audio/LinearFilter.hpp \

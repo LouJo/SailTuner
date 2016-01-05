@@ -22,12 +22,13 @@
 #include <iostream>
 #include <fstream>
 
+#include "PitchDetection.hpp"
 #include "Tuner.hpp"
 
 Q_DECL_EXPORT int main(int argc, char* argv[])
 {
 	if (argc == 2) {
-		TunerWorker::analyse_file(argv[1]);
+		PitchDetection::analyse_file(argv[1]);
 		return 0;
 	}
 

@@ -32,32 +32,24 @@ using namespace std;
 Tuner::Tuner()
 {
 	running = false;
-	freq = deviation = 0;
-	note = octave = 0;
-	found = false;
+	temperament_idx = 0;
 	la = Scale::defaultLa;
 
 	worker = new TunerWorker();
-
-	temperaments = new Temperaments(":/data");
-
-	if (temperaments->SetTemperament(0)) {
-		worker->SetNotesFrequencies(temperaments->NotesFrequencies());
-	}
 
 	worker->moveToThread(&workerThread);
 
 	connect(&workerThread, &QThread::finished, worker, &QObject::deleteLater);
 	connect(&workerThread, &QThread::started, worker, &TunerWorker::Entry);
-	connect(this, &Tuner::quit, worker, &TunerWorker::Quit, Qt::DirectConnection);
 
+	connect(this, &Tuner::quit, worker, &TunerWorker::Quit, Qt::DirectConnection);
 	connect(this, &Tuner::start, worker, &TunerWorker::Start);
 	connect(this, &Tuner::stop, worker, &TunerWorker::Stop);
-	connect(this, &Tuner::setNotesFrequencies, worker, &TunerWorker::SetNotesFrequencies);
+	connect(this, &Tuner::setTemperamentIndex, worker, &TunerWorker::SetTemperament);
 	connect(this, &Tuner::setLa, worker, &TunerWorker::SetLa);
 
-	connect(worker, &TunerWorker::resultFound, this, &Tuner::ResultFound);
-	connect(worker, &TunerWorker::resultNotFound, this, &Tuner::ResultNotFound);
+	connect(worker, &TunerWorker::resultUpdated, this, &Tuner::ResultUpdated);
+	connect(worker, &TunerWorker::temperamentListUpdated, this, &Tuner::TemperamentListUpdated);
 
 	workerThread.start();
 }
@@ -67,7 +59,6 @@ Tuner::~Tuner()
 	quit();
 //	workerThread.quit();
 	workerThread.wait(10);
-	delete temperaments;
 }
 
 bool Tuner::GetRunning()
@@ -80,42 +71,42 @@ void Tuner::SetRunning(bool r)
 	if (running == r) return;
 
 	running = r;
-	if (r) start();
-	else stop();
+	if (r) emit start();
+	else emit stop();
 
-	runningChanged();
+	emit runningChanged();
 }
 
 double Tuner::GetFreq()
 {
-	return freq;
+	return result.frequency;
 }
 
 int Tuner::GetNote()
 {
-	return note;
+	return result.note;
 }
 
 double Tuner::GetDeviation()
 {
-	return deviation;
+	return result.deviation;
 }
 
 int Tuner::GetOctave()
 {
-	return octave;
+	return result.octave;
 }
 
 bool Tuner::GetFound()
 {
-	return found;
+	return result.found;
 }
 
 void Tuner::SetLa(double la)
 {
 	this->la = la;
-	setLa(la);
-	laChanged();
+	emit setLa(la);
+	emit laChanged();
 }
 
 double Tuner::GetLa()
@@ -125,39 +116,33 @@ double Tuner::GetLa()
 
 unsigned int Tuner::GetTemperamentIndex()
 {
-	return temperaments->GetCurrentIndex();
+	return temperament_idx;
 }
 
-void Tuner::SetTemperamentIndex(unsigned int idx)
+void Tuner::SetTemperamentIndex(int idx)
 {
-	if (temperaments->SetTemperament(idx)) {
-		setNotesFrequencies(temperaments->NotesFrequencies());
-		temperamentChanged();
-	}
+	temperament_idx = idx;
+	emit setTemperamentIndex(idx);
+	emit temperamentChanged();
 }
 
 QStringList Tuner::GetTemperamentList() const
 {
-	return temperaments->GetNames();
+	return temperament_list;
 }
 
-void Tuner::ResultFound(int note, int octave, double deviation, double freq)
+void Tuner::ResultUpdated(const PitchDetection::PitchResult &result)
 {
-	this->note = note;
-	this->octave = octave;
-	this->deviation = deviation;
-	this->freq = freq;
-	resultChanged();
+	const bool changed = (this->result.found ^ result.found);
 
-	if (!found) {
-		foundChanged();
-		found = true;
-	}
+	this->result = result;
+
+	if (result.found) emit resultChanged();
+	if (changed) emit foundChanged();
 }
 
-void Tuner::ResultNotFound(double freq)
+void Tuner::TemperamentListUpdated(const QStringList &list)
 {
-	this->freq = freq;
-	found = false;
-	foundChanged();
+	temperament_list = list;
+	emit temperamentListChanged();
 }
