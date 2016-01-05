@@ -18,8 +18,6 @@
 #ifndef _PITCH_DETECTION_HPP
 #define _PITCH_DETECTION_HPP
 
-#include <fstream>
-
 #include "audio/LinearFilter.hpp"
 #include "audio/ZeroCross.hpp"
 #include "scale/Scale.hpp"
@@ -45,12 +43,12 @@ class PitchDetection {
 		void Set(int n, int o, double d, double f);
 	};
 
-	private:
 	static const int rate = 16000;
+
+	private:
 	static const int defaultNbFrame = 1024;
 	static const int defaultFreqMin = 50;
 	static const int defaultFreqMax = 2000;
-	static const int nbSamplePreventRunning = rate * 40; // 40 seconds
 	/// number of analyses to confirm a note
 	static const int nbConfirm = 3;
 	/// number of analyses to drop a note
@@ -58,13 +56,10 @@ class PitchDetection {
 	/// number of deviation values for average
 	static const int nbDeviationValues = 8;
 
-	static const char *filename_record;
-
 	LinearFilter<int16_t> *high_filter;
 	ZeroCross<int16_t> *cross;
 	Scale *scale;
 	Temperaments *temperaments;
-	std::ofstream file_record;
 
 	PitchResult result;
 	bool updated;
@@ -100,8 +95,6 @@ class PitchDetection {
 
 	/// analyse a file for debug
 	static void analyse_file(const char *filename);
-	/// write a file with raw audio
-	static void set_record(const char *filename_record);
 };
 
 #endif

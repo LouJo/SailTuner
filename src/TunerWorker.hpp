@@ -35,13 +35,13 @@ class TunerWorker : public QObject {
 	Q_OBJECT
 
 	private:
+	static const int nbSecPreventRunning = 40;
+	static const char *filename_record;
+
 	QMutex mutex;
 	QWaitCondition condition;
 
-	PitchDetection *pitchDetection;
-
 	bool running, quit;
-	int nb_sample_running;
 
 	// to update vars
 	double la_to_update;
@@ -59,6 +59,9 @@ class TunerWorker : public QObject {
 	void SetLa(double la);
 	void Entry();
 	void Quit();
+
+	/// write a file with raw audio
+	static void set_record(const char *filename_record);
 
 	signals:
 	void resultUpdated(const PitchDetection::PitchResult &result);

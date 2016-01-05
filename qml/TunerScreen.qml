@@ -40,6 +40,8 @@ Item {
 	property color led_green: "green"
 	property color led_red: "red"
 
+	opacity: tuner.running ? 1 : 0.8
+
 	property bool dev_is_ok: Math.abs(tuner.deviation) <= deviation_ok
 
 	Led {

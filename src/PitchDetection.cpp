@@ -26,8 +26,6 @@ using namespace std;
 static double a10[] = { 1        , -2.99214602,  2.98432286, -0.99217678 };
 static double b10[] = { 0.99608071, -2.98824212,  2.98824212, -0.99608071 };
 
-const char * PitchDetection::filename_record = NULL;
-
 /// Pitch detection result methods
 
 PitchDetection::PitchResult::PitchResult() :
@@ -52,8 +50,6 @@ void PitchDetection::PitchResult::Set(int n, int o, double d, double f)
 
 PitchDetection::PitchDetection()
 {
-	if (filename_record) file_record.open(filename_record);
-
 	high_filter = new LinearFilter<int16_t>(3, a10, b10);
 
 	ZeroCross<int16_t>::Config cross_config({rate, defaultNbFrame, defaultFreqMin, defaultFreqMax});
@@ -74,7 +70,6 @@ PitchDetection::PitchDetection()
 
 PitchDetection::~PitchDetection()
 {
-	if (filename_record && file_record.is_open()) file_record.close();
 	delete high_filter;
 	delete cross;
 	delete scale;
@@ -169,9 +164,6 @@ void PitchDetection::SetTemperament(int idx)
 
 void PitchDetection::AudioAnalyse(const int16_t *ptr, int nb_frame)
 {
-	// record in file is needed
-	if (filename_record && file_record.is_open()) file_record.write((char*) ptr, nb_frame * sizeof(int16_t));
-
 	// compute every audio frame
 	while (nb_frame--) ComputeFrame(*ptr++);
 
@@ -198,13 +190,6 @@ bool PitchDetection::GetResultUpdated(PitchResult &res)
 QStringList PitchDetection::GetTemperamentList() const
 {
 	return temperaments->GetNames();
-}
-
-/// Set a filename to record raw audio stream
-
-void PitchDetection::set_record(const char *f)
-{
-	filename_record = f;
 }
 
 /// for analyse_file console logs

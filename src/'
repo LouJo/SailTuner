@@ -138,7 +138,7 @@ void TunerWorker::Entry()
 		mutex.unlock();
 
 		// record in file is needed
-		//if (file) file->write((char*) ptr, nb_frame * sizeof(int16_t));
+		//if (file) file_record.write((char*) ptr, nb_frame * sizeof(int16_t));
 
 		std::cout << __func__ << " do job" << std::endl;
 	}
@@ -159,7 +159,7 @@ void TunerWorker::Entry()
 	}*/
 }
 
-/// Set a filename before instanciation to record raw audio stream
+/// Set a filename to record raw audio stream
 
 void TunerWorker::set_record(const char *f)
 {
