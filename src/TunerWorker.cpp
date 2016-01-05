@@ -28,7 +28,7 @@ using namespace std;
 
 static void blank_prevent(bool prevent)
 {
-	cerr << __func__ << endl;
+	cerr << __func__ << " " << prevent << endl;
 	QDBusConnection system = QDBusConnection::connectToBus(QDBusConnection::SystemBus, "system");
 	QDBusInterface interface("com.nokia.mce", "/com/nokia/mce/request", "com.nokia.mce.request", system);
 
@@ -63,6 +63,7 @@ void TunerWorker::Start()
 
 void TunerWorker::Stop()
 {
+	cerr << __func__ << endl;
 	mutex.lock();
 	running = false;
 	mutex.unlock();
@@ -84,7 +85,7 @@ void TunerWorker::SetLa(double la)
 	mutex.unlock();
 }
 
-void TunerWorker::SetTemperament(int idx)
+void TunerWorker::SetTemperamentIndex(int idx)
 {
 	mutex.lock();
 	temperament_to_update = idx;
@@ -94,6 +95,7 @@ void TunerWorker::SetTemperament(int idx)
 void TunerWorker::Entry()
 {
 	cerr << __func__ << endl;
+
 	pitchDetection = new PitchDetection();
 	emit temperamentListUpdated(pitchDetection->GetTemperamentList());
 
@@ -124,6 +126,8 @@ void TunerWorker::Entry()
 
 		std::cout << __func__ << " do job" << std::endl;
 	}
+
+	cerr << __func__ << " quit" << endl;
 /*
 	// prevent screen blanking
 	if (nb_sample_running >= nbSamplePreventRunning && running) {

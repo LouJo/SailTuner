@@ -55,7 +55,7 @@ class TunerWorker : public QObject {
 	public slots:
 	void Start();
 	void Stop();
-	void SetTemperament(int idx);
+	void SetTemperamentIndex(int idx);
 	void SetLa(double la);
 	void Entry();
 	void Quit();

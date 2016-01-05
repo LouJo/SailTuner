@@ -42,12 +42,6 @@ Tuner::Tuner()
 	connect(&workerThread, &QThread::finished, worker, &QObject::deleteLater);
 	connect(&workerThread, &QThread::started, worker, &TunerWorker::Entry);
 
-	connect(this, &Tuner::quit, worker, &TunerWorker::Quit, Qt::DirectConnection);
-	connect(this, &Tuner::start, worker, &TunerWorker::Start);
-	connect(this, &Tuner::stop, worker, &TunerWorker::Stop);
-	connect(this, &Tuner::setTemperamentIndex, worker, &TunerWorker::SetTemperament);
-	connect(this, &Tuner::setLa, worker, &TunerWorker::SetLa);
-
 	connect(worker, &TunerWorker::resultUpdated, this, &Tuner::ResultUpdated);
 	connect(worker, &TunerWorker::temperamentListUpdated, this, &Tuner::TemperamentListUpdated);
 
@@ -56,9 +50,9 @@ Tuner::Tuner()
 
 Tuner::~Tuner()
 {
-	quit();
-//	workerThread.quit();
-	workerThread.wait(10);
+	worker->Quit();
+	workerThread.quit();
+	workerThread.wait(100);
 }
 
 bool Tuner::GetRunning()
@@ -71,8 +65,8 @@ void Tuner::SetRunning(bool r)
 	if (running == r) return;
 
 	running = r;
-	if (r) emit start();
-	else emit stop();
+	if (r) worker->Start();
+	else worker->Stop();
 
 	emit runningChanged();
 }
@@ -105,7 +99,7 @@ bool Tuner::GetFound()
 void Tuner::SetLa(double la)
 {
 	this->la = la;
-	emit setLa(la);
+	worker->SetLa(la);
 	emit laChanged();
 }
 
@@ -122,7 +116,7 @@ unsigned int Tuner::GetTemperamentIndex()
 void Tuner::SetTemperamentIndex(int idx)
 {
 	temperament_idx = idx;
-	emit setTemperamentIndex(idx);
+	worker->SetTemperamentIndex(idx);
 	emit temperamentChanged();
 }
 

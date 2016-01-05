@@ -75,13 +75,6 @@ class Tuner : public QObject {
 	void resultChanged();
 	void temperamentChanged();
 	void temperamentListChanged();
-
-	// signals to worker
-	void quit();
-	void start();
-	void stop();
-	void setTemperamentIndex(int idx);
-	void setLa(double la_freq);
 };
 
 #endif

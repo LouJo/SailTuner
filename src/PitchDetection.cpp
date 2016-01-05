@@ -222,6 +222,10 @@ void PitchDetection::analyse_file(const char *filename)
 	cout << "analyse file " << filename << endl;
 	ifstream fin;
 	fin.open(filename);
+	if (!fin.is_open()) {
+		cerr << "file not opened" << endl;
+		return;
+	}
 
 	const int nb_frame = 1024;
 	PitchDetection *pitch = new PitchDetection();

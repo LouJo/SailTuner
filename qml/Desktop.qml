@@ -24,7 +24,7 @@ Item {
 
 	Tuner {
 		id: tuner
-		running: true
+		running: false
 	}
 
 	DesktopTheme {
