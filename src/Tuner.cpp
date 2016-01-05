@@ -35,6 +35,8 @@ Tuner::Tuner()
 	temperament_idx = 0;
 	la = Scale::defaultLa;
 
+	qRegisterMetaType<PitchDetection::PitchResult>("PitchDetection::PitchResult");
+
 	worker = new TunerWorker();
 
 	worker->moveToThread(&workerThread);

@@ -36,6 +36,7 @@ class TunerWorker : public QObject {
 
 	private:
 	static const int nbSecPreventRunning = 40;
+	static const int nbSampleBuffer = 512;
 	static const char *filename_record;
 
 	QMutex mutex;

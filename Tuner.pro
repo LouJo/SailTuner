@@ -1,9 +1,11 @@
 QT += qml quick gui multimedia dbus
 TARGET = Tuner
 
-CONFIG += c++11 debug
+CONFIG += c++11 debug link_pkgconfig
 
-# PKGCONFIG += libpulse
+DEFINES += TARGET=\""$(TARGET")\"
+
+PKGCONFIG += libpulse-simple
 
 SOURCES += \
 	src/desktop.cpp \

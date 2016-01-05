@@ -20,8 +20,17 @@
 
 #include <iostream>
 #include <fstream>
+#include <stdint.h>
+
+extern "C" {
+#include <pulse/simple.h>
+}
 
 #include "TunerWorker.hpp"
+
+#define name_(x) #x
+#define name(x) name_(x)
+#define NAME name(TARGET)
 
 using namespace std;
 
@@ -50,6 +59,7 @@ TunerWorker::TunerWorker() :
 	la_to_update(0),
 	temperament_to_update(-1)
 {
+	//qRegisterMetaType<PitchDetection::PitchResult>("PitchDetection::PitchResult");
 }
 
 TunerWorker::~TunerWorker()
@@ -102,12 +112,37 @@ void TunerWorker::Entry()
 
 	int nbSamplePreventRunning = nbSecPreventRunning * PitchDetection::rate;
 	int nb_sample_running = 0;
+	bool new_stream = true;
+
+	int16_t *buffer = new int16_t[nbSampleBuffer];
+
+	PitchDetection::PitchResult result;
 
 	ofstream *file = NULL;
 	if (filename_record) file = new ofstream(filename_record);
 
 	PitchDetection *pitchDetection = new PitchDetection();
 	emit temperamentListUpdated(pitchDetection->GetTemperamentList());
+
+	// pulseaudio
+	pa_simple *p_simple;
+	pa_sample_spec p_spec;
+
+	p_spec.format = PA_SAMPLE_S16NE;
+	p_spec.channels = 1;
+	p_spec.rate = PitchDetection::rate;
+
+	p_simple = pa_simple_new(
+		NULL,
+		NAME,
+		PA_STREAM_RECORD,
+		NULL,
+		"Mic",
+		&p_spec,
+		NULL,
+		NULL,
+		NULL
+	);
 
 	while (1) {
 		// wait for running
@@ -117,10 +152,7 @@ void TunerWorker::Entry()
 			while (!running && !quit) condition.wait(&mutex);
 			cerr << "wake-up" << endl;
 			// reset operations on start
-			if (!quit) {
-				pitchDetection->Reset();
-				nb_sample_running = 0;
-			}
+			new_stream = true;
 		}
 		if (quit) {
 			mutex.unlock();
@@ -137,26 +169,50 @@ void TunerWorker::Entry()
 		}
 		mutex.unlock();
 
-		// record in file is needed
-		//if (file) file->write((char*) ptr, nb_frame * sizeof(int16_t));
+		// if srteam was stopped, reset analyse
+		if (new_stream) {
+			pitchDetection->Reset();
+			nb_sample_running = 0;
+			// flush audio
+			pa_simple_flush(p_simple, NULL);
+			new_stream = false;
+		}
 
-		std::cout << __func__ << " do job" << std::endl;
+		// get audio data
+		int size = pa_simple_read(p_simple, (void*) buffer, nbSampleBuffer << 1, NULL);
+		if (size < 0) {
+			cerr << "audio read failed " << size << endl;
+			continue;
+		}
+		//cerr << "read " << nb_sample_running << endl;
+
+		// record in file is needed
+		if (file) file->write((char*) buffer, nbSampleBuffer << 1);
+
+		pitchDetection->AudioAnalyse(buffer, nbSampleBuffer);
+
+		if (pitchDetection->GetResultUpdated(result)) {
+			if (result.found) cout << Scale::NoteName(result.note) << " " << result.frequency << endl;
+			emit resultUpdated(result);
+		}
+
+		// prevent screen blanking
+		nb_sample_running += nbSampleBuffer;
+		if (nb_sample_running >= nbSamplePreventRunning && running) {
+			nb_sample_running = 0;
+			blank_prevent(true);
+		}
 	}
 
+	pa_simple_free(p_simple);
+
 	delete pitchDetection;
+	delete buffer;
 
 	if (file) {
 		file->close();
 		delete file;
 	}
-
-	cerr << __func__ << " quit" << endl;
-/*
-	// prevent screen blanking
-	if (nb_sample_running >= nbSamplePreventRunning && running) {
-		nb_sample_running = 0;
-		blank_prevent(true);
-	}*/
 }
 
 /// Set a filename before instanciation to record raw audio stream
