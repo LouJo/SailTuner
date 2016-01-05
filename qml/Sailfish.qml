@@ -36,6 +36,7 @@ ApplicationWindow {
 		Page {
 			id: page
 			allowedOrientations: Orientation.All
+			signal togglePause()
 
 			SilicaFlickable {
 				anchors.fill: parent
@@ -53,9 +54,14 @@ ApplicationWindow {
 				running: Qt.application.active && app.userRunning
 			}
 
+			MouseArea {
+				anchors.fill: parent
+				onClicked: togglePause()
+			}
+
 			Component.onCompleted: {
 				app.tuner = tunerObject
-				//togglePause.connect(app.togglePause)
+				togglePause.connect(app.togglePause)
 			}
 		}
 	}

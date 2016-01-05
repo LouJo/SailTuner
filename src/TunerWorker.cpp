@@ -110,9 +110,9 @@ void TunerWorker::Entry()
 {
 	cerr << __func__ << endl;
 
-	int nbSamplePreventRunning = nbSecPreventRunning * PitchDetection::rate;
+	int nbSamplePreventBlanking = nbSecPreventBlanking * PitchDetection::rate;
 	int nb_sample_running = 0;
-	bool new_stream = true;
+	bool new_stream = true, waked;
 
 	int16_t *buffer = new int16_t[nbSampleBuffer];
 
@@ -125,31 +125,26 @@ void TunerWorker::Entry()
 	emit temperamentListUpdated(pitchDetection->GetTemperamentList());
 
 	// pulseaudio
-	pa_simple *p_simple;
+	pa_simple *p_simple = NULL;
 	pa_sample_spec p_spec;
 
 	p_spec.format = PA_SAMPLE_S16NE;
 	p_spec.channels = 1;
 	p_spec.rate = PitchDetection::rate;
 
-	p_simple = pa_simple_new(
-		NULL,
-		NAME,
-		PA_STREAM_RECORD,
-		NULL,
-		"Mic",
-		&p_spec,
-		NULL,
-		NULL,
-		NULL
-	);
-
 	while (1) {
 		// wait for running
 		mutex.lock();
 		if (!running) {
 			blank_prevent(false);
-			while (!running && !quit) condition.wait(&mutex);
+			while (!running && !quit) {
+				waked = condition.wait(&mutex, p_simple ? stopPulseAfterMs : ULONG_MAX);
+				if (!waked && p_simple) {
+					// stop pulseaudio after a delay if not running
+					pa_simple_free(p_simple);
+					p_simple = NULL;
+				}
+			}
 			cerr << "wake-up" << endl;
 			// reset operations on start
 			new_stream = true;
@@ -169,12 +164,29 @@ void TunerWorker::Entry()
 		}
 		mutex.unlock();
 
+		if (!p_simple) {
+			// start pulseaudio if stopped
+			p_simple = pa_simple_new(
+					NULL,
+					NAME,
+					PA_STREAM_RECORD,
+					NULL,
+					"Mic",
+					&p_spec,
+					NULL,
+					NULL,
+					NULL
+					);
+		}
+		else if (new_stream) {
+			// flush pulseaudio if paused
+			pa_simple_flush(p_simple, NULL);
+		}
+
 		// if srteam was stopped, reset analyse
 		if (new_stream) {
 			pitchDetection->Reset();
 			nb_sample_running = 0;
-			// flush audio
-			pa_simple_flush(p_simple, NULL);
 			new_stream = false;
 		}
 
@@ -198,13 +210,13 @@ void TunerWorker::Entry()
 
 		// prevent screen blanking
 		nb_sample_running += nbSampleBuffer;
-		if (nb_sample_running >= nbSamplePreventRunning && running) {
+		if (nb_sample_running >= nbSamplePreventBlanking && running) {
 			nb_sample_running = 0;
 			blank_prevent(true);
 		}
 	}
 
-	pa_simple_free(p_simple);
+	if (p_simple) pa_simple_free(p_simple);
 
 	delete pitchDetection;
 	delete buffer;

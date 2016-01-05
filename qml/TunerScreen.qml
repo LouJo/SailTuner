@@ -151,11 +151,4 @@ Item {
 			index: tuner.octave
 		}
 	}
-
-	MouseArea {
-		anchors.fill: parent
-		onClicked: {
-			tuner.running = tuner.running ^ true
-		}
-	}
 }

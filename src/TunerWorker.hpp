@@ -35,8 +35,13 @@ class TunerWorker : public QObject {
 	Q_OBJECT
 
 	private:
-	static const int nbSecPreventRunning = 40;
+	/// time beetween dbus signals to prevent screen blanking
+	static const int nbSecPreventBlanking = 40;
+	/// nb of audio sample to read from pulseaudio at once
 	static const int nbSampleBuffer = 512;
+	/// stop pulseaudio after time if not running
+	static const int stopPulseAfterMs = 2000; // 2 sec
+
 	static const char *filename_record;
 
 	QMutex mutex;

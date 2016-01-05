@@ -36,4 +36,9 @@ Item {
 		theme: theme
 		tuner: tuner
 	}
+
+	MouseArea {
+		anchors.fill: parent
+		onClicked: tuner.running = (tuner.running ^ true)
+	}
 }
