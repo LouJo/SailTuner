@@ -9,6 +9,7 @@ PKGCONFIG += libpulse-simple
 
 SOURCES += \
 	src/desktop.cpp \
+	src/ObjectSaver.cpp \
 	src/PitchDetection.cpp \
 	src/Tuner.cpp \
 	src/TunerWorker.cpp \
@@ -19,6 +20,7 @@ SOURCES += \
 
 HEADERS += \
 	src/PitchDetection.hpp \
+	src/ObjectSaver.hpp \
 	src/Tuner.hpp \
 	src/TunerWorker.hpp \
 	src/audio/LinearFilter.hpp \

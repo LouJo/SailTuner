@@ -16,6 +16,7 @@
  */
 
 import QtQuick 2.0
+import "."
 
 /**
  * ScaleToise
@@ -31,7 +32,7 @@ Toise {
 	// octave
 	property int octave: 4
 	// en or fr
-	property int notes_style: 1
+	property int notes_style: Config.notes_style
 
 	property variant notes_fr: [
 		"do", "do#", "ré", "mib", "mi", "fa", "fa#", "sol", "sol#", "la", "sib", "si"]

@@ -53,6 +53,8 @@ Q_DECL_EXPORT int main(int argc, char* argv[])
 	}
 
 	qmlRegisterType<Tuner>("harbour.sailtuner.tuner", 1, 0, "Tuner");
+	qmlRegisterType<ObjectSaver>("harbour.sailtuner.objectsaver", 1, 0, "ObjectSaver");
+
 	Main *appli = new Main(argc, argv);
 	return appli->Launch();
 }

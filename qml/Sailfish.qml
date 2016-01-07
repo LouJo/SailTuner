@@ -18,6 +18,8 @@
 import QtQuick 2.0
 import Sailfish.Silica 1.0
 import harbour.sailtuner.tuner 1.0
+import harbour.sailtuner.objectsaver 1.0
+import "."
 
 /**
  * Sailfish main page
@@ -31,6 +33,11 @@ ApplicationWindow {
 	property bool userRunning: true
 	property int dbFontSize: 100
 	property QtObject tuner
+
+	ObjectSaver {
+		filename: "config.dat"
+		object: Config
+	}
 
 	initialPage: Component {
 		Page {
@@ -52,6 +59,8 @@ ApplicationWindow {
 			Tuner {
 				id: tunerObject
 				running: Qt.application.active && app.userRunning
+				temperament_idx: Config.temperament_idx
+				la: Config.la
 			}
 
 			MouseArea {

@@ -17,6 +17,9 @@
 
 import QtQuick 2.0
 import LJTuner 1.0
+import LJUtils 1.0
+
+import "."
 
 Item {
 	width: 600
@@ -25,6 +28,13 @@ Item {
 	Tuner {
 		id: tuner
 		running: false
+		temperament_idx: Config.temperament_idx
+		la: Config.la
+	}
+
+	ObjectSaver {
+		filename: "config.dat"
+		object: Config
 	}
 
 	DesktopTheme {

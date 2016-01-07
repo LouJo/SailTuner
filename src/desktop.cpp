@@ -22,6 +22,7 @@
 #include <iostream>
 #include <fstream>
 
+#include "ObjectSaver.hpp"
 #include "PitchDetection.hpp"
 #include "Tuner.hpp"
 
@@ -33,6 +34,7 @@ Q_DECL_EXPORT int main(int argc, char* argv[])
 	}
 
 	qmlRegisterType<Tuner>("LJTuner", 1, 0, "Tuner");
+	qmlRegisterType<ObjectSaver>("LJUtils", 1, 0, "ObjectSaver");
 
 	QGuiApplication app(argc, argv);
 	QQuickView view;
