@@ -47,6 +47,7 @@ Item {
 
 	property int first_mark: Math.floor(position) % nb_marks
 	property double delta: position - Math.floor(position)
+	property int idx_modulo: index % nb_marks
 
 	Behavior on position {
 		NumberAnimation {
@@ -80,7 +81,7 @@ Item {
 					anchors.horizontalCenter: parent.horizontalCenter
 					anchors.verticalCenter: parent.verticalCenter
 					text: marks[idx]
-					color: theme.primaryColor
+					color: idx == idx_modulo ? theme.primaryColor : theme.secondaryColor
 					font.pixelSize: parent.height / 2
 				}
 			}
