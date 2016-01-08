@@ -18,13 +18,17 @@
 #include <QDebug>
 #include <QDir>
 #include <QFile>
+#include <QMetaObject>
+#include <QMetaProperty>
 #include <QStandardPaths>
+#include <QString>
+#include <iostream>
 
 #include "ObjectSaver.hpp"
 
-#define name_(x) #x
-#define name(x) name_(x)
-#define NAME name(TARGET)
+#define program_name_(x) #x
+#define program_name(x) program_name_(x)
+#define PROGRAM_NAME program_name(TARGET)
 
 ObjectSaver::ObjectSaver() :
 	object(NULL)
@@ -76,9 +80,9 @@ QFile * ObjectSaver::getDataFile(bool is_write)
 	}
 	if (is_write) {
 		QDir dir(qDataDir);
-		dir.mkpath(NAME);
+		dir.mkpath(PROGRAM_NAME);
 	}
-	QString path = qDataDir + "/" + NAME + "/" + filename;
+	QString path = qDataDir + "/" + PROGRAM_NAME + "/" + filename;
 
 	QFile *file = new QFile(path);
 
@@ -95,18 +99,73 @@ QFile * ObjectSaver::getDataFile(bool is_write)
 	return file;
 }
 
+/// which types we manage
+static bool type_ok(QVariant::Type type)
+{
+	switch (type) {
+		case QVariant::Int:
+		case QVariant::Double:
+		case QVariant::String:
+			return true;
+
+		default:
+			return false;
+	}
+}
+
 void ObjectSaver::load()
 {
 	QFile *file = getDataFile(false);
 	if (!file) return;
+
+	// load object from file
+	QMetaProperty property;
+	const QMetaObject *meta = object->metaObject();
+	QString title, value;
+	const char *t;
+	int offset;
+	char c;
+
+	while (!file->atEnd()) {
+		title = file->readLine(100).trimmed();
+		t = title.toStdString().c_str();
+		offset = meta->indexOfProperty(t);
+		if (offset != -1 && !file->atEnd() && type_ok(meta->property(offset).type())) {
+			value = file->readLine(100).trimmed();
+			if (!object->setProperty(t, value /*value.toInt(&ok, 10)*/)) {
+				qDebug() << __func__  << " set property " << title << " to " << value << " failed";
+			}
+			else {
+				qDebug()  << __func__  << " set property " << title << " to " << value << " ok";
+			}
+		}
+	}
+
 	file->close();
 	delete file;
+
+	emit objectChanged();
 }
 
 void ObjectSaver::save()
 {
+	qDebug() << __func__;
 	QFile *file = getDataFile(true);
 	if (!file) return;
+
+	// save object in file
+	QMetaProperty property;
+	const QMetaObject *meta = object->metaObject();
+
+	for (int i = meta->propertyOffset(); i < meta->propertyCount(); i++) {
+		property = meta->property(i);
+		if (!type_ok(property.type())) continue;
+		file->write(property.name());
+		file->putChar('\n');
+		file->write(object->property(property.name()).toByteArray());
+		file->putChar('\n');
+	}
+
 	file->close();
 	delete file;
 }
