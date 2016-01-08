@@ -22,9 +22,11 @@ import QtQuick 2.0
  *  to work on qml files
  */
 
-Item {
-	width: 600
-	height: 200
+Image {
+	width: 800
+	height: 400
+
+	source: "../images/bg_portait.png"
 
 	DesktopTheme {
 		id: theme
