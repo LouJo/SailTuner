@@ -18,12 +18,15 @@
 import QtQuick 2.0
 import Sailfish.Silica 1.0
 
-import ".." // Config singleton
+import "." // Config singleton
 
 Dialog {
 	id: configurePage
 	allowedOrientations: Orientation.All
 
+	signal configChanged()
+
+	property QtObject tuner;
 	property variant la_tab: [392, 400, 415, 430, 440, 442]
 
 	Column {
@@ -52,17 +55,53 @@ Dialog {
 				model: la_tab.length
 
 				Rectangle {
-					width: pre_la_parent.width / tab_la.length
+					width: pre_la_parent.width / la_tab.length
 					border.color: Theme.primaryColor
 					border.width: 1
+					color: la.text == la_tab[parent.index] ? Theme.highlightColor : "transparent"
 
 					Text {
+						id: la_freq
 						font.pixelSize: Theme.fontSizeSmall
 						text: tab_la[parent.index]
-						onClick: la.text = text
+					}
+					MouseArea {
+						anchors.fill: parent
+						onClicked: la.text = la_freq.text
 					}
 				}
 			}
 		}
+
+		/// temperaments
+		ComboBox {
+			id: combo
+			width: parent.width
+			label: qsTr("Temperament")
+			currentIndex: Config.temperament_idx
+			property variant temp_list: tuner.temperament_list
+
+			menu: ContextMenu {
+				Repeater {
+					model: combo.temp_list.length
+
+					MenuItem {
+						text: combo.temp_list[index]
+					}
+				}
+			}
+		}
+
+		TextSwitch {
+			id: notes_style
+			text: qsTr("French notes")
+			down: Config.note_style == 1
+		}
+	}
+	onAccepted: {
+		Config.la = la.text
+		Config.temperament_idx = combo.currentIndex
+		Config.notes_style = notes_style.checked ? 1 : 0
+		configChanged()
 	}
 }

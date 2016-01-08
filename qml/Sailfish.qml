@@ -54,8 +54,8 @@ ApplicationWindow {
 					MenuItem {
 						text: qsTr("Configuration")
 						onClicked: {
-							var confpage = pageStack.push(Qt.resolvedUrl("ConfigurePage.qml"))
-							confpage.accepted.connect(saver.save)
+							var confpage = pageStack.push(Qt.resolvedUrl("ConfigurePageSailfish.qml"), { tuner: app.tuner })
+							confpage.configChanged.connect(saver.save)
 						}
 					}
 				}
@@ -70,6 +70,7 @@ ApplicationWindow {
 						onClicked: togglePause()
 					}
 				}
+				
 			}
 
 			Tuner {

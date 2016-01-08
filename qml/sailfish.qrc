@@ -7,6 +7,8 @@
 <file>ScaleToise.qml</file>
 <file>Toise.qml</file>
 <file>Led.qml</file>
-<file>ConfigurePage.qml</file>
+<file>ConfigurePageSailfish.qml</file>
+<file>Config.qml</file>
+<file>qmldir</file>
 </qresource>
 </RCC>

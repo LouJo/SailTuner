@@ -19,6 +19,7 @@
 #include <QQuickView>
 #include <QtQml>
 #include <sailfishapp.h>
+#include "ObjectSaver.hpp"
 #include "Tuner.hpp"
 
 class Main {
