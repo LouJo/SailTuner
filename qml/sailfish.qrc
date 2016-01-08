@@ -7,5 +7,6 @@
 <file>ScaleToise.qml</file>
 <file>Toise.qml</file>
 <file>Led.qml</file>
+<file>ConfigurePage.qml</file>
 </qresource>
 </RCC>

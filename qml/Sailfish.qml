@@ -35,6 +35,7 @@ ApplicationWindow {
 	property QtObject tuner
 
 	ObjectSaver {
+		id: saver
 		filename: "config.dat"
 		object: Config
 	}
@@ -43,17 +44,32 @@ ApplicationWindow {
 		Page {
 			id: page
 			allowedOrientations: Orientation.All
+
 			signal togglePause()
 
 			SilicaFlickable {
 				anchors.fill: parent
 
+				PullDownMenu {
+					MenuItem {
+						text: qsTr("Configuration")
+						onClicked: {
+							var confpage = pageStack.push(Qt.resolvedUrl("ConfigurePage.qml"))
+							confpage.accepted.connect(saver.save)
+						}
+					}
+				}
+
 				TunerScreen {
 					anchors.fill: parent
 					theme: Theme
 					tuner: app.tuner
-				}
 
+					MouseArea {
+						anchors.fill: parent
+						onClicked: togglePause()
+					}
+				}
 			}
 
 			Tuner {
@@ -63,10 +79,6 @@ ApplicationWindow {
 				la: Config.la
 			}
 
-			MouseArea {
-				anchors.fill: parent
-				onClicked: togglePause()
-			}
 
 			Component.onCompleted: {
 				app.tuner = tunerObject
