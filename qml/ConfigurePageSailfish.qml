@@ -59,12 +59,12 @@ Dialog {
 					width: pre_la_parent.width / la_tab.length
 					border.color: Theme.primaryColor
 					border.width: 1
-					color: la.text == la_tab[parent.index] ? Theme.highlightColor : "transparent"
+					color: la.text == configurePage.la_tab[parent.index] ? Theme.highlightColor : "transparent"
 
 					Text {
 						id: la_freq
 						font.pixelSize: Theme.fontSizeSmall
-						text: la_tab[parent.index]
+						text: configurePage.la_tab[parent.parent.index]
 					}
 					MouseArea {
 						anchors.fill: parent
