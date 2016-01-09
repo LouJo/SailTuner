@@ -39,15 +39,13 @@ class TunerWorker : public QObject {
 	static const int nbSecPreventBlanking = 40;
 	/// nb of audio sample to read from pulseaudio at once
 	static const int nbSampleBuffer = 512;
-	/// stop pulseaudio after time if not running
-	static const int stopPulseAfterMs = 2000; // 2 sec
 
 	static const char *filename_record;
 
 	QMutex mutex;
 	QWaitCondition condition;
 
-	bool running, quit;
+	bool running, playing, quit;
 
 	// to update vars
 	double la_to_update;
@@ -61,6 +59,7 @@ class TunerWorker : public QObject {
 	public slots:
 	void Start();
 	void Stop();
+	void SetPlaying(bool p);
 	void SetTemperamentIndex(int idx);
 	void SetLa(double la);
 	void Entry();

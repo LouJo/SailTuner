@@ -25,6 +25,7 @@
 
 class Tuner : public QObject {
 	Q_OBJECT
+	Q_PROPERTY(bool playing READ GetPlaying WRITE SetPlaying NOTIFY playingChanged)
 	Q_PROPERTY(bool running READ GetRunning WRITE SetRunning NOTIFY runningChanged)
 	Q_PROPERTY(double freq READ GetFreq NOTIFY resultChanged)
 	Q_PROPERTY(double deviation READ GetDeviation NOTIFY resultChanged)
@@ -41,7 +42,7 @@ class Tuner : public QObject {
 
 	PitchDetection::PitchResult result;
 	QStringList temperament_list;
-	bool running;
+	bool running, playing;
 	double la;
 	int temperament_idx;
 
@@ -49,6 +50,8 @@ class Tuner : public QObject {
 	Tuner();
 	~Tuner();
 
+	bool GetPlaying();
+	void SetPlaying(bool p);
 	bool GetRunning();
 	void SetRunning(bool r);
 	double GetFreq();
@@ -69,6 +72,7 @@ class Tuner : public QObject {
 
 	signals:
 	// signals to UI
+	void playingChanged();
 	void runningChanged();
 	void foundChanged();
 	void laChanged();

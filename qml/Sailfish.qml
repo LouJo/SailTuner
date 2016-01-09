@@ -75,7 +75,7 @@ ApplicationWindow {
 
 			Tuner {
 				id: tunerObject
-				running: Qt.application.active && app.userRunning
+				running: Qt.application.active && page.status == PageStatus.Active && app.userRunning
 				temperament_idx: Config.temperament_idx
 				la: Config.la
 			}

@@ -57,6 +57,18 @@ Tuner::~Tuner()
 	workerThread.wait(100);
 }
 
+bool Tuner::GetPlaying()
+{
+	return playing;
+}
+
+void Tuner::SetPlaying(bool p)
+{
+	if (p == playing) return;
+	playing = p;
+	emit playingChanged();
+}
+
 bool Tuner::GetRunning()
 {
 	return running;

@@ -83,10 +83,19 @@ void TunerWorker::Stop()
 	mutex.unlock();
 }
 
+void TunerWorker::SetPlaying(bool p)
+{
+	cerr << __func__ << " " << p << endl;
+	if (p == playing) return;
+	mutex.lock();
+	playing = p;
+	if (p) condition.wakeOne();
+	mutex.unlock();
+}
+
 void TunerWorker::Quit()
 {
 	mutex.lock();
-	running = false;
 	quit = true;
 	condition.wakeOne();
 	mutex.unlock();
@@ -112,7 +121,6 @@ void TunerWorker::Entry()
 
 	int nbSamplePreventBlanking = nbSecPreventBlanking * PitchDetection::rate;
 	int nb_sample_running = 0;
-	bool new_stream = true, waked;
 
 	int16_t *buffer = new int16_t[nbSampleBuffer];
 
@@ -125,34 +133,43 @@ void TunerWorker::Entry()
 	emit temperamentListUpdated(pitchDetection->GetTemperamentList());
 
 	// pulseaudio
-	pa_simple *p_simple = NULL;
+	pa_simple *p_record = NULL, *p_play = NULL;
 	pa_sample_spec p_spec;
 
 	p_spec.format = PA_SAMPLE_S16NE;
 	p_spec.channels = 1;
 	p_spec.rate = PitchDetection::rate;
 
+	// prevent lpm if running on startup
+	if (running || playing) blank_prevent(true);
+
 	while (1) {
+		// free pulseaudio if not running
+		if (!running && p_record) {
+			pa_simple_free(p_record);
+			p_record = NULL;
+		}
+		if (!playing && p_play) {
+			pa_simple_free(p_play);
+			p_play = NULL;
+		}
+
 		// wait for running
 		mutex.lock();
-		if (!running) {
+		if (!running && !playing) {
 			blank_prevent(false);
-			while (!running && !quit) {
-				waked = condition.wait(&mutex, p_simple ? stopPulseAfterMs : ULONG_MAX);
-				if (!waked && p_simple) {
-					// stop pulseaudio after a delay if not running
-					pa_simple_free(p_simple);
-					p_simple = NULL;
-				}
+			while (!running && !playing && !quit) {
+				condition.wait(&mutex);
 			}
 			cerr << "wake-up" << endl;
-			// reset operations on start
-			new_stream = true;
+			nb_sample_running = 0;
+			if (!quit) blank_prevent(true);
 		}
 		if (quit) {
 			mutex.unlock();
 			break;
 		}
+
 		// update config
 		if (la_to_update) {
 			pitchDetection->SetLa(la_to_update);
@@ -164,52 +181,64 @@ void TunerWorker::Entry()
 		}
 		mutex.unlock();
 
-		if (!p_simple) {
-			// start pulseaudio if stopped
-			p_simple = pa_simple_new(
-					NULL,
-					NAME,
-					PA_STREAM_RECORD,
-					NULL,
-					"Mic",
-					&p_spec,
-					NULL,
-					NULL,
-					NULL
-					);
+		if (running ) {
+			// tuner detection running
+
+			if (!p_record) {
+				// start pulseaudio if stopped
+				p_record = pa_simple_new(
+						NULL,
+						NAME,
+						PA_STREAM_RECORD,
+						NULL,
+						"Tuner record",
+						&p_spec,
+						NULL,
+						NULL,
+						NULL
+						);
+				// reset detection
+				pitchDetection->Reset();
+				result.found = false;
+				emit resultUpdated(result);
+			}
+
+			// get audio data
+			int size = pa_simple_read(p_record, (void*) buffer, nbSampleBuffer << 1, NULL);
+			if (size < 0) {
+				cerr << "audio read failed " << size << endl;
+				continue;
+			}
+			//cerr << "read " << nb_sample_running << endl;
+
+			// record in file is needed
+			if (file) file->write((char*) buffer, nbSampleBuffer << 1);
+
+			pitchDetection->AudioAnalyse(buffer, nbSampleBuffer);
+
+			if (pitchDetection->GetResultUpdated(result)) {
+				if (result.found) cout << Scale::NoteName(result.note) << " " << result.frequency << endl;
+				emit resultUpdated(result);
+			}
+
 		}
-		else if (new_stream) {
-			// flush pulseaudio if paused
-			pa_simple_flush(p_simple, NULL);
-		}
 
-		// if stream was stopped, reset analyse
-		if (new_stream) {
-			pitchDetection->Reset();
-			blank_prevent(true);
-			nb_sample_running = 0;
-			new_stream = false;
-			// send a not-found result on restart
-			result.found = false;
-			emit resultUpdated(result);
-		}
-
-		// get audio data
-		int size = pa_simple_read(p_simple, (void*) buffer, nbSampleBuffer << 1, NULL);
-		if (size < 0) {
-			cerr << "audio read failed " << size << endl;
-			continue;
-		}
-		//cerr << "read " << nb_sample_running << endl;
-
-		// record in file is needed
-		if (file) file->write((char*) buffer, nbSampleBuffer << 1);
-
-		pitchDetection->AudioAnalyse(buffer, nbSampleBuffer);
-
-		if (pitchDetection->GetResultUpdated(result)) {
-			if (result.found) cout << Scale::NoteName(result.note) << " " << result.frequency << endl;
-			emit resultUpdated(result);
+		if (playing) {
+			// play
+			if (!p_play) {
+				// start pulseaudio if stopped
+				p_record = pa_simple_new(
+						NULL,
+						NAME,
+						PA_STREAM_PLAYBACK,
+						NULL,
+						"Tuner playback",
+						&p_spec,
+						NULL,
+						NULL,
+						NULL
+						);
+			}
 		}
 
 		// prevent screen blanking
@@ -220,7 +249,8 @@ void TunerWorker::Entry()
 		}
 	}
 
-	if (p_simple) pa_simple_free(p_simple);
+	if (p_record) pa_simple_free(p_record);
+	if (p_play) pa_simple_free(p_play);
 
 	delete pitchDetection;
 	delete buffer;
@@ -229,6 +259,7 @@ void TunerWorker::Entry()
 		file->close();
 		delete file;
 	}
+	blank_prevent(false);
 }
 
 /// Set a filename before instanciation to record raw audio stream
