@@ -26,7 +26,7 @@ Image {
 	width: 800
 	height: 400
 
-	source: "../images/bg_portait.png"
+	source: "../images/bg_portrait.png"
 
 	DesktopTheme {
 		id: theme

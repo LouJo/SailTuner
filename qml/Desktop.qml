@@ -41,10 +41,15 @@ Item {
 		id: theme
 	}
 
-	TunerScreen {
+	Image {
 		anchors.fill: parent
-		theme: theme
-		tuner: tuner
+		source: "../images/bg_portrait.png"
+
+		TunerScreen {
+			anchors.fill: parent
+			theme: theme
+			tuner: tuner
+		}
 	}
 
 	MouseArea {
