@@ -44,6 +44,7 @@ Dialog {
 			id: la
 			text: Config.la
 			label: qsTr("La")
+			width: Theme.fontSizeMedium * 5
 		}
 
 		/// predefined la(s)
@@ -63,7 +64,7 @@ Dialog {
 					Text {
 						id: la_freq
 						font.pixelSize: Theme.fontSizeSmall
-						text: tab_la[parent.index]
+						text: la_tab[parent.index]
 					}
 					MouseArea {
 						anchors.fill: parent
@@ -95,7 +96,7 @@ Dialog {
 		TextSwitch {
 			id: notes_style
 			text: qsTr("French notes")
-			down: Config.note_style == 1
+			checked: Config.notes_style == 1
 		}
 	}
 	onAccepted: {
