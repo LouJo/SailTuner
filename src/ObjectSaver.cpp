@@ -121,18 +121,20 @@ void ObjectSaver::load()
 	// load object from file
 	QMetaProperty property;
 	const QMetaObject *meta = object->metaObject();
-	QString title, value;
-	const char *t;
+	QByteArray title;
+	QString value;
 	int offset;
-	char c;
+	bool ok;
 
 	while (!file->atEnd()) {
 		title = file->readLine(100).trimmed();
-		t = title.toStdString().c_str();
-		offset = meta->indexOfProperty(t);
+		offset = meta->indexOfProperty(title.constData());
 		if (offset != -1 && !file->atEnd() && type_ok(meta->property(offset).type())) {
 			value = file->readLine(100).trimmed();
-			if (!object->setProperty(t, value /*value.toInt(&ok, 10)*/)) {
+
+			ok = object->setProperty(title.constData(), value);
+
+			if (!ok) {
 				qDebug() << __func__  << " set property " << title << " to " << value << " failed";
 			}
 			else {

@@ -33,6 +33,7 @@ Item {
 	}
 
 	ObjectSaver {
+		id: saver
 		filename: "config.dat"
 		object: Config
 	}
