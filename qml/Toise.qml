@@ -49,6 +49,8 @@ Item {
 	property double delta: position - Math.floor(position)
 	property int idx_modulo: index % nb_marks
 
+	property alias cellWidth: toise.cellWidth
+
 	Behavior on position {
 		NumberAnimation {
 			duration: 200
@@ -60,7 +62,7 @@ Item {
 		id: toise
 		anchors.top: parent.top
 		anchors.left: parent.left
-		anchors.leftMargin: is_pair ? - cellWidth * delta : 0
+		anchors.leftMargin: - cellWidth * delta
 		anchors.bottom: parent.bottom
 		anchors.right: parent.right
 		anchors.topMargin: h_margin

@@ -129,7 +129,7 @@ Item {
 		}
 
 		// octave toise
-		Toise {
+		ToiseFlickable {
 			anchors.top: main.is_portrait ? title_octave.bottom : toise.bottom
 			anchors.topMargin: parent.margin_h
 
@@ -138,7 +138,7 @@ Item {
 
 			theme: main.theme
 
-			marks: [1, 2, 3, 4, 5, 6, 7, 9]
+			marks: [1, 2, 3, 4, 5, 6, 7, 8, 9]
 			//nb_marks_displayed: is_portrait ? 4 : 3
 
 			width: parent.width * 0.6
