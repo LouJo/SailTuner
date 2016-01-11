@@ -29,8 +29,11 @@ Dialog {
 	property QtObject tuner;
 	property variant la_tab: [392, 400, 415, 430, 440, 442]
 
+	property int buttonHeight: Theme.fontSizeSmall * 1.2
+
 	Column {
 		width: parent.width
+		spacing: Theme.paddingLarge
 
 		DialogHeader {
 			id: header
@@ -40,36 +43,63 @@ Dialog {
 			title: qsTr("Configuration")
 		}
 
-		TextField {
-			id: la
-			text: Config.la
-			label: qsTr("La")
-			width: Theme.fontSizeMedium * 5
+		Item {
+			width: parent.width
+			height: Theme.fontSizeLarge * 3
+			property int margin_x: buttonHeight / 2
+
+			TextField {
+				id: la
+				anchors.left: parent.left
+				anchors.leftMargin: parent.margin_x
+				text: Config.la
+				label: qsTr("La")
+				width: Theme.fontSizeMedium * 5
+			}
+
+			Button {
+				id: minus
+				width: buttonHeight * 2
+				height: buttonHeight
+				anchors.left: la.right
+				anchors.leftMargin: parent.margin_x
+				text: "-"
+				preferredWidth: Theme.buttonWidthSmall
+				onClicked: la.text = parseInt(la.text) - 1
+			}
+
+			Button {
+				width: buttonHeight * 2
+				height: buttonHeight
+				anchors.left: minus.right
+				anchors.leftMargin: parent.margin_x
+				text: "+"
+				preferredWidth: Theme.buttonWidthSmall
+				onClicked: la.text = parseInt(la.text) + 1
+			}
 		}
 
 		/// predefined la(s)
-		Row {
+		Item {
 			id: pre_la_parent
 			width: parent.width
+			height: Theme.fontSizeSmall * 3;
+			property double case_l: width / la_tab.length
+			property double case_margin: case_l / 8;
+			property double case_width: case_l - case_margin * 2
 
 			Repeater {
 				model: la_tab.length
 
-				Rectangle {
-					width: pre_la_parent.width / la_tab.length
-					border.color: Theme.primaryColor
-					border.width: 1
-					color: la.text == configurePage.la_tab[parent.index] ? Theme.highlightColor : "transparent"
-
-					Text {
-						id: la_freq
-						font.pixelSize: Theme.fontSizeSmall
-						text: configurePage.la_tab[parent.parent.index]
-					}
-					MouseArea {
-						anchors.fill: parent
-						onClicked: la.text = la_freq.text
-					}
+				Button {
+					text: configurePage.la_tab[index]
+					width: pre_la_parent.case_width
+					height: buttonHeight
+					preferredWidth: Theme.buttonWidthSmall
+					x: index * pre_la_parent.case_l + pre_la_parent.case_margin
+					y: 0
+					down: la.text == configurePage.la_tab[index]
+					onClicked: la.text = text
 				}
 			}
 		}
