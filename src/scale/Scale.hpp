@@ -56,8 +56,14 @@ class Scale {
 	/// Set notes frequencies from a temperament
 	void SetNotesFrequencies(const double freq[nbNote]);
 
+	/// Get ref freq for la4
 	double GetLa();
+
+	/// Set ref freq for la4
 	void SetLa(double la);
+
+	/// get note frequency
+	double GetNoteFreq(int note, int octave);
 
 	/**
 	 * Find nearest note, octave, and deviation

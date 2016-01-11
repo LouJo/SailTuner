@@ -198,6 +198,11 @@ QStringList PitchDetection::GetTemperamentList() const
 	return temperaments->GetNames();
 }
 
+double PitchDetection::GetNoteFreq(int note, int octave) const
+{
+	return scale->GetNoteFreq(note, octave);
+}
+
 /// for analyse_file console logs
 static void display_results(const PitchDetection::PitchResult &res)
 {

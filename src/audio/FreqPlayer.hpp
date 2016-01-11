@@ -53,7 +53,9 @@ template<typename sample_t> class FreqPlayer {
 	/// reset current sound
 	void Reset();
 	/// get next audio frame
-	sample_t AudioFrame();
+	inline sample_t AudioFrame();
+	/// write audio buffer
+	void WriteAudio(sample_t *out, int nb_frame);
 	/// set current frequency
 	void SetFreq(double freq);
 	/// set current volume

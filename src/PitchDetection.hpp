@@ -92,6 +92,8 @@ class PitchDetection {
 	void SetTemperament(int idx);
 	/// Get temperament list
 	QStringList GetTemperamentList() const;
+	/// Get the note frequency from Scale
+	double GetNoteFreq(int note, int octave) const;
 
 	/// analyse a file for debug
 	static void analyse_file(const char *filename);

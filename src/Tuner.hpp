@@ -29,8 +29,8 @@ class Tuner : public QObject {
 	Q_PROPERTY(bool running READ GetRunning WRITE SetRunning NOTIFY runningChanged)
 	Q_PROPERTY(double freq READ GetFreq NOTIFY resultChanged)
 	Q_PROPERTY(double deviation READ GetDeviation NOTIFY resultChanged)
-	Q_PROPERTY(int note READ GetNote NOTIFY resultChanged)
-	Q_PROPERTY(int octave READ GetOctave NOTIFY resultChanged)
+	Q_PROPERTY(int note READ GetNote WRITE SetNote NOTIFY resultChanged)
+	Q_PROPERTY(int octave READ GetOctave WRITE SetOctave NOTIFY resultChanged)
 	Q_PROPERTY(bool found READ GetFound NOTIFY foundChanged)
 	Q_PROPERTY(int temperament_idx READ GetTemperamentIndex WRITE SetTemperamentIndex NOTIFY temperamentChanged)
 	Q_PROPERTY(QStringList temperament_list READ GetTemperamentList NOTIFY temperamentListChanged)
@@ -56,7 +56,9 @@ class Tuner : public QObject {
 	void SetRunning(bool r);
 	double GetFreq();
 	int GetNote();
+	void SetNote(int note);
 	int GetOctave();
+	void SetOctave(int octave);
 	double GetDeviation();
 	bool GetFound();
 	unsigned int GetTemperamentIndex();

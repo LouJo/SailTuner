@@ -13,6 +13,7 @@ SOURCES += \
 	src/PitchDetection.cpp \
 	src/Tuner.cpp \
 	src/TunerWorker.cpp \
+	src/audio/FreqPlayer.cpp \
 	src/audio/LinearFilter.cpp \
 	src/audio/ZeroCross.cpp \
 	src/scale/Scale.cpp \
@@ -23,6 +24,7 @@ HEADERS += \
 	src/ObjectSaver.hpp \
 	src/Tuner.hpp \
 	src/TunerWorker.hpp \
+	src/audio/FreqPlayer.hpp \
 	src/audio/LinearFilter.hpp \
 	src/audio/ZeroCross.hpp \
 	src/scale/Scale.hpp \

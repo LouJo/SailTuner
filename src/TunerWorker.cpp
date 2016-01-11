@@ -26,6 +26,7 @@ extern "C" {
 #include <pulse/simple.h>
 }
 
+#include "audio/FreqPlayer.hpp"
 #include "TunerWorker.hpp"
 
 #define name_(x) #x
@@ -57,7 +58,9 @@ TunerWorker::TunerWorker() :
 	running(false),
 	quit(false),
 	la_to_update(0),
-	temperament_to_update(0) // update the first time in every cases
+	temperament_to_update(0), // update the first time in every cases
+	note_to_update(-1),
+	octave_to_update(-1)
 {
 	//qRegisterMetaType<PitchDetection::PitchResult>("PitchDetection::PitchResult");
 }
@@ -115,6 +118,21 @@ void TunerWorker::SetTemperamentIndex(int idx)
 	mutex.unlock();
 }
 
+void TunerWorker::SetNote(int note)
+{
+	mutex.lock();
+	note_to_update = note;
+	mutex.unlock();
+}
+
+
+void TunerWorker::SetOctave(int octave)
+{
+	mutex.lock();
+	octave_to_update = octave;
+	mutex.unlock();
+}
+
 void TunerWorker::Entry()
 {
 	cerr << __func__ << endl;
@@ -131,6 +149,8 @@ void TunerWorker::Entry()
 
 	PitchDetection *pitchDetection = new PitchDetection();
 	emit temperamentListUpdated(pitchDetection->GetTemperamentList());
+
+	FreqPlayer<int16_t> *player = new FreqPlayer<int16_t>(PitchDetection::rate);
 
 	// pulseaudio
 	pa_simple *p_record = NULL, *p_play = NULL;
@@ -179,6 +199,16 @@ void TunerWorker::Entry()
 			pitchDetection->SetTemperament(temperament_to_update);
 			temperament_to_update = -1;
 		}
+		if (note_to_update != -1) {
+			result.note = note_to_update;
+			note_to_update = -1;
+			player->SetFreq(pitchDetection->GetNoteFreq(result.note, result.octave));
+		}
+		if (octave_to_update != -1) {
+			result.octave = octave_to_update;
+			octave_to_update = -1;
+			player->SetFreq(pitchDetection->GetNoteFreq(result.note, result.octave));
+		}
 		mutex.unlock();
 
 		if (running ) {
@@ -220,14 +250,13 @@ void TunerWorker::Entry()
 				if (result.found) cout << Scale::NoteName(result.note) << " " << result.frequency << endl;
 				emit resultUpdated(result);
 			}
-
-		}
+		} // running
 
 		if (playing) {
 			// play
 			if (!p_play) {
 				// start pulseaudio if stopped
-				p_record = pa_simple_new(
+				p_play = pa_simple_new(
 						NULL,
 						NAME,
 						PA_STREAM_PLAYBACK,
@@ -238,8 +267,16 @@ void TunerWorker::Entry()
 						NULL,
 						NULL
 						);
+
+				// update frequency to update from previous tuner results
+				player->SetFreq(pitchDetection->GetNoteFreq(result.note, result.octave));
 			}
-		}
+
+			player->WriteAudio(buffer, nbSampleBuffer);
+			if (pa_simple_write(p_play, buffer, nbSampleBuffer << 1, nullptr) < 0) {
+				cerr << "audio write failed" << endl;
+			}
+		} // playing
 
 		// prevent screen blanking
 		nb_sample_running += nbSampleBuffer;
@@ -252,6 +289,7 @@ void TunerWorker::Entry()
 	if (p_record) pa_simple_free(p_record);
 	if (p_play) pa_simple_free(p_play);
 
+	delete player;
 	delete pitchDetection;
 	delete buffer;
 

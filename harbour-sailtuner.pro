@@ -17,6 +17,7 @@ SOURCES += \
 	src/ObjectSaver.cpp \
 	src/Tuner.cpp \
 	src/TunerWorker.cpp \
+	src/audio/FreqPlayer.cpp \
 	src/audio/LinearFilter.cpp \
 	src/audio/ZeroCross.cpp \
 	src/scale/Scale.cpp \
@@ -28,6 +29,7 @@ HEADERS += \
 	src/Tuner.cpp \
 	src/Tuner.hpp \
 	src/TunerWorker.hpp \
+	src/audio/FreqPlayer.hpp \
 	src/audio/LinearFilter.hpp \
 	src/audio/ZeroCross.hpp \
 	src/scale/Scale.hpp \

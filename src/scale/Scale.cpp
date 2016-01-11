@@ -139,3 +139,14 @@ void Scale::SetLa(double la)
 	actualLa = la;
 	if (freq_setted) updateScale();
 }
+
+double Scale::GetNoteFreq(int note, int octave)
+{
+	assert(note >= 0 && note < nbNote);
+	double f = actualNoteFreq[note];
+	octave -= 4;
+	if (octave < 0) f /= 1 << octave;
+	else if (octave > 0) f *= 1 << octave;
+
+	return f;
+}

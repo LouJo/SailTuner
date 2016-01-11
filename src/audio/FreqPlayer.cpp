@@ -20,42 +20,53 @@
 
 #include "FreqPlayer.hpp"
 
-template typename<sample_t> FreqPlayer<sample_t>::FreqPlayer(int _rate):
-	rate(_rate),
+template<typename sample_t> FreqPlayer<sample_t>::FreqPlayer(int _rate):
 	freq(440),
 	volume(0.2),
+	rate(_rate),
 	n_frame(0),
 	waveform(W_SINUS)
 {
 }
 
-template typename<sample_t> void FreqPlayer<sample_t>::Reset()
+template<typename sample_t> void FreqPlayer<sample_t>::Reset()
 {
 	n_frame = 0;
 }
 
-template typename<sample_s> void FreqPlayer<sample_t>::SetFreq(double freq)
+template<typename sample_t> void FreqPlayer<sample_t>::SetFreq(double freq)
 {
 	this->freq = freq;
 }
 
-template typename<sample_s> void FreqPlayer<sample_t>::SetVolume(double volume)
+template<typename sample_t> void FreqPlayer<sample_t>::SetVolume(double volume)
 {
 	this->volume = volume;
 }
 
-int16_t FreqPlayer<int16_t>::max() { return INT16_MAX; }
-double FreqPlayer<double>::max() { return 1; }
+template<> int16_t FreqPlayer<int16_t>::max() { return INT16_MAX; }
+template<> double FreqPlayer<double>::max() { return 1; }
 
-template typename<sample_t> double FreqPlayer<sample_t>::radius()
+template<typename sample_t> double FreqPlayer<sample_t>::radius()
 {
-	return (double) (n_sample++) * freq / rate * M_PI * 2;
+	return (double) (n_frame++) * freq / rate * M_PI * 2;
 }
 
-template typename<sample_t> sample_t FreqPlayer<sample_t>::AudioFrame()
+template<typename sample_t> sample_t FreqPlayer<sample_t>::AudioFrame()
 {
-//	return (n_sample++)
+	switch (waveform) {
+	case W_SINUS:
+	return (double) sin(radius()) * max();
+
+	default:
+	return 0;
+	}
+}
+
+template<typename sample_t> void FreqPlayer<sample_t>::WriteAudio(sample_t *out, int nb_frame)
+{
+	while (nb_frame--) *out++ = AudioFrame();
 }
 
 // instanciation for int16
-template class LinearFilter<int16_t>;
+template class FreqPlayer<int16_t>;

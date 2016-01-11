@@ -49,7 +49,7 @@ class TunerWorker : public QObject {
 
 	// to update vars
 	double la_to_update;
-	int temperament_to_update;
+	int temperament_to_update, note_to_update, octave_to_update;
 
 	public:
 	/// constructor
@@ -62,6 +62,8 @@ class TunerWorker : public QObject {
 	void SetPlaying(bool p);
 	void SetTemperamentIndex(int idx);
 	void SetLa(double la);
+	void SetNote(int note);
+	void SetOctave(int octave);
 	void Entry();
 	void Quit();
 

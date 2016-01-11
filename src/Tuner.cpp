@@ -66,6 +66,7 @@ void Tuner::SetPlaying(bool p)
 {
 	if (p == playing) return;
 	playing = p;
+	worker->SetPlaying(p);
 	emit playingChanged();
 }
 
@@ -95,6 +96,14 @@ int Tuner::GetNote()
 	return result.note;
 }
 
+void Tuner::SetNote(int note)
+{
+	if (result.note == note) return;
+	result.note = note;
+	worker->SetNote(note);
+	emit resultChanged();
+}
+
 double Tuner::GetDeviation()
 {
 	return result.deviation;
@@ -103,6 +112,14 @@ double Tuner::GetDeviation()
 int Tuner::GetOctave()
 {
 	return result.octave;
+}
+
+void Tuner::SetOctave(int octave)
+{
+	if (result.octave == octave) return;
+	result.octave = octave;
+	worker->SetOctave(octave);
+	emit resultChanged();
 }
 
 bool Tuner::GetFound()
