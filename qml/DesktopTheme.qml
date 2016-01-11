@@ -29,4 +29,7 @@ Item {
 	property int fontSizeExtraLarge: 40
 
 	property string icon_pause: "../images/icon-m-pause.svg"
+
+	property string icon_pause_large: "../images/icon-l-pause.svg"
+	property string icon_play_large: "../images/icon-l-play.svg"
 }

@@ -41,9 +41,11 @@ Image {
 		property bool found: true
 		property variant temperament_list: ["Weikmeister III", "equal"]
 		property int temperament_idx: 0
+		property bool running: false
+		property bool playing: false
 	}
 
-	TunerScreen {
+	PlayerScreen {
 		tuner: tuner
 		theme: theme
 	}
