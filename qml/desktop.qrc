@@ -7,6 +7,7 @@
 <file>CircleMeter.qml</file>
 <file>ScaleToise.qml</file>
 <file>Toise.qml</file>
+<file>ToiseFlickable.qml</file>
 <file>Led.qml</file>
 <file>Config.qml</file>
 <file>qmldir</file>

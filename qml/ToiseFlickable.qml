@@ -24,9 +24,21 @@ import QtQuick 2.0
  */
 
 Toise {
+	property bool flik_enable: true
+
+	property int multiple: index % nb_marks
+
+	property double p_min: index2pos(min)
+	property double p_max: index2pos(max)
+
+
+	animation_enabled: false
+
 	MouseArea {
 		property int refX: 0
 		property double refPos: parent.position
+
+		enabled: flik_enable
 
 		anchors.fill: parent
 
@@ -38,26 +50,18 @@ Toise {
 			if (!pressed) return
 			var d = (refX - mouseX) / parent.cellWidth
 			var p = refPos + d
+			p = Math.max(Math.min(p, p_max), p_min)
 			var i = Math.round(p + (nb_marks_displayed - 1) / 2)
-			index = i % nb_marks
+			index = i
 			position = p
 			delta = position - Math.floor(position)
 			first_mark = Math.floor(position) % nb_marks
 		}
 		onReleased: {
-			var p = 0
-			var d = position - Math.floor(position)
-			if (d < 0.5) {
-				p = Math.floor(position)
-			}
-			else {
-				p = Math.ceil(position)
-			}
-			var i = Math.floor(p + (nb_marks_displayed - 1) / 2)
-			index = i % nb_marks
-			first_mark = p % nb_marks
+			var p = index2pos(index)
 			position = p
-			delta = 0
+			delta = position - Math.floor(position)
+			//console.log("index:" + index)
 		}
 	}
 }

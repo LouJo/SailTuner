@@ -106,6 +106,8 @@ Item {
 			id: toise
 			theme: main.theme
 
+			flik_enable: false
+
 			anchors.top: main.is_portrait ? title_note.bottom : parent.top
 			anchors.topMargin: parent.margin_h
 

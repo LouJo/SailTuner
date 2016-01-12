@@ -113,6 +113,8 @@ Item {
 
 			note: tuner.note
 			octave: tuner.octave
+
+			onMultipleChanged: tuner.octave = index / 12
 		}
 
 		Text {
@@ -139,12 +141,18 @@ Item {
 			theme: main.theme
 
 			marks: [1, 2, 3, 4, 5, 6, 7, 8]
+			min: 0
+			max: marks.length - 1
 			//nb_marks_displayed: is_portrait ? 4 : 3
 
 			width: parent.width * 0.6
 			height: parent.toise_h
 
-			index: tuner.octave
+			index: tuner.octave - 1
+			onIndexChanged: {
+			//	tuner.note = (tuner.note % 12) * (index + 1)
+			//	tuner.octave = index + 1
+			}
 		}
 	}
 }

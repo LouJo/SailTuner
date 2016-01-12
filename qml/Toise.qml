@@ -35,6 +35,10 @@ Item {
 	// function to get mark color
 	property var mark_color: function (id) { return "transparent" }
 
+	// min and max values
+	property double min: 0
+	property double max: 100
+
 	property int h_margin: Math.max(height / 8, main_mark.border_d)
 
 	property int nb_marks: marks.length
@@ -42,16 +46,20 @@ Item {
 	property int nb_marks_displayed: nb_marks
 	property bool is_pair: nb_marks_displayed % 2 == 0
 
+	function index2pos(i) { return i - (nb_marks_displayed - 1) / 2 }
+
 	/// current mark is on the middle
-	property double position: index - (nb_marks_displayed - 1) / 2
+	property double position: index2pos(index)
 
 	property int first_mark: Math.floor(position) % nb_marks
 	property double delta: position - Math.floor(position)
 	property int idx_modulo: index % nb_marks
 
 	property alias cellWidth: toise.cellWidth
+	property bool animation_enabled: true
 
 	Behavior on position {
+		enabled: animation_enabled
 		NumberAnimation {
 			duration: 200
 			easing.amplitude: nb_marks
@@ -76,7 +84,8 @@ Item {
 				width: toise.cellWidth
 				height: toise.height
 				border.width: 1
-				property int idx: (index + nb_marks + first_mark) % nb_marks
+				property int idx_ref: Math.floor(position) + index
+				property int idx: (index + first_mark + nb_marks) % nb_marks
 				color: mark_color(idx)
 
 				Text {
@@ -85,6 +94,7 @@ Item {
 					text: marks[idx]
 					color: idx == idx_modulo ? theme.primaryColor : theme.secondaryColor
 					font.pixelSize: parent.height / 2
+					opacity: idx_ref >= min && idx_ref <= max ? 1 : 0.2
 				}
 			}
 		}

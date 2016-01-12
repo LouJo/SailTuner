@@ -24,7 +24,7 @@ import "."
  * Display notes from scale, with current note centered.
  */
 
-Toise {
+ToiseFlickable {
 	id: scale
 
 	// note
@@ -57,4 +57,8 @@ Toise {
 	function isAltered(i) {
 		return (i < 4 && (i & 1)) || (i > 5 && !(i & 1))
 	}
+
+	// ToiseFlikcable parameters
+	min: notes_en.length * 1 // ut 1
+	max: notes_en.length * 9 - 1 // si 8
 }
