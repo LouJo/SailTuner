@@ -147,7 +147,7 @@ Item {
 			width: is_portrait ? meter.width / 2 : parent.width / 6
 			height: parent.toise_h
 
-			index: tuner.octave
+			index: tuner.octave - 1
 		}
 	}
 
