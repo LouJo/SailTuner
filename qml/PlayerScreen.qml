@@ -138,7 +138,7 @@ Item {
 
 			theme: main.theme
 
-			marks: [1, 2, 3, 4, 5, 6, 7, 8, 9]
+			marks: [1, 2, 3, 4, 5, 6, 7, 8]
 			//nb_marks_displayed: is_portrait ? 4 : 3
 
 			width: parent.width * 0.6

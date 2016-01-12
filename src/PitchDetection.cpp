@@ -22,6 +22,13 @@
 
 using namespace std;
 
+/* with scpy:
+ *
+ * nyq=rate/2
+ * norm=cutoff/nyq
+ * b, a = butter(order, norm, btype='high', analog=False)
+ */
+
 // high 10hz / 16k
 static double a10[] = { 1        , -2.99214602,  2.98432286, -0.99217678 };
 static double b10[] = { 0.99608071, -2.98824212,  2.98824212, -0.99608071 };

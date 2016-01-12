@@ -46,15 +46,15 @@ class PitchDetection {
 	static const int rate = 16000;
 
 	private:
-	static const int defaultNbFrame = 1024;
-	static const int defaultFreqMin = 50;
-	static const int defaultFreqMax = 2000;
+	static const int defaultNbFrame = 2048;
+	static const int defaultFreqMin = 30;
+	static const int defaultFreqMax = 3000;
 	/// number of analyses to confirm a note
 	static const int nbConfirm = 3;
 	/// number of analyses to drop a note
-	static const int nbDefect = 20;
+	static const int nbDefect = 14;
 	/// number of deviation values for average
-	static const int nbDeviationValues = 8;
+	static const int nbDeviationValues = 4;
 
 	LinearFilter<int16_t> *high_filter;
 	ZeroCross<int16_t> *cross;
