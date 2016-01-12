@@ -56,6 +56,7 @@ static void blank_prevent(bool prevent)
 
 TunerWorker::TunerWorker() :
 	running(false),
+	playing(false),
 	quit(false),
 	la_to_update(0),
 	temperament_to_update(0), // update the first time in every cases
@@ -164,6 +165,8 @@ void TunerWorker::Entry()
 	if (running || playing) blank_prevent(true);
 
 	while (1) {
+
+		mutex.lock();
 		// free pulseaudio if not running
 		if (!running && p_record) {
 			pa_simple_free(p_record);
@@ -175,7 +178,6 @@ void TunerWorker::Entry()
 		}
 
 		// wait for running
-		mutex.lock();
 		if (!running && !playing) {
 			blank_prevent(false);
 			while (!running && !playing && !quit) {
@@ -209,9 +211,11 @@ void TunerWorker::Entry()
 			octave_to_update = -1;
 			player->SetFreq(pitchDetection->GetNoteFreq(result.note, result.octave));
 		}
+		bool m_running = running;
+		bool m_playing = playing;
 		mutex.unlock();
 
-		if (running ) {
+		if (m_running ) {
 			// tuner detection running
 
 			if (!p_record) {
@@ -252,7 +256,7 @@ void TunerWorker::Entry()
 			}
 		} // running
 
-		if (playing) {
+		if (m_playing) {
 			// play
 			if (!p_play) {
 				// start pulseaudio if stopped
