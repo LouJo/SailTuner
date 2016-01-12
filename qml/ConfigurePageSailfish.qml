@@ -33,7 +33,6 @@ Dialog {
 
 	Column {
 		width: parent.width
-		spacing: Theme.paddingLarge
 
 		DialogHeader {
 			id: header
@@ -41,6 +40,7 @@ Dialog {
 
 		PageHeader {
 			title: qsTr("Configuration")
+			visible: configurePage.height > 600
 		}
 
 		Item {
@@ -52,6 +52,7 @@ Dialog {
 				id: la
 				anchors.left: parent.left
 				anchors.leftMargin: parent.margin_x
+				anchors.top: parent.top
 				text: Config.la
 				label: qsTr("La")
 				width: Theme.fontSizeMedium * 5
@@ -63,6 +64,8 @@ Dialog {
 				height: buttonHeight
 				anchors.left: la.right
 				anchors.leftMargin: parent.margin_x
+				anchors.top: parent.top
+				anchors.topMargin: Theme.fontSizeSmall
 				text: "-"
 				preferredWidth: Theme.buttonWidthSmall
 				onClicked: la.text = parseInt(la.text) - 1
@@ -73,6 +76,8 @@ Dialog {
 				height: buttonHeight
 				anchors.left: minus.right
 				anchors.leftMargin: parent.margin_x
+				anchors.top: parent.top
+				anchors.topMargin: Theme.fontSizeSmall
 				text: "+"
 				preferredWidth: Theme.buttonWidthSmall
 				onClicked: la.text = parseInt(la.text) + 1
@@ -83,10 +88,12 @@ Dialog {
 		Item {
 			id: pre_la_parent
 			width: parent.width
-			height: Theme.fontSizeSmall * 3;
-			property double case_l: width / la_tab.length
-			property double case_margin: case_l / 8;
-			property double case_width: case_l - case_margin * 2
+			height: Theme.fontSizeSmall * 3 + 20;
+
+			property int margin_min: 10
+			property int case_width: Math.min(Theme.fontSizeMedium * 2, (width - margin_min * (la_tab.length + 1)) / la_tab.length)
+			property int case_margin: Math.min(Theme.fontSizeMedium, (width - case_width * la_tab.length) / (la_tab.length + 1))
+			property int case_l: case_margin + case_width
 
 			Repeater {
 				model: la_tab.length
@@ -97,7 +104,7 @@ Dialog {
 					height: buttonHeight
 					preferredWidth: Theme.buttonWidthSmall
 					x: index * pre_la_parent.case_l + pre_la_parent.case_margin
-					y: 0
+					y: 10
 					down: la.text == configurePage.la_tab[index]
 					onClicked: la.text = text
 				}
@@ -129,6 +136,7 @@ Dialog {
 			checked: Config.notes_style == 1
 		}
 	}
+
 	onAccepted: {
 		Config.la = la.text
 		Config.temperament_idx = combo.currentIndex
