@@ -59,7 +59,7 @@ ToiseFlickable {
 	}
 
 	// ToiseFlikcable parameters
-	min: notes_en.length * 1 // ut 1
+	min: notes_en.length * 0 // ut 0
 	max: notes_en.length * 9 - 1 // si 8
 
 	onOctaveChanged: {

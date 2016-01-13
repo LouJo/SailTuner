@@ -113,7 +113,7 @@ Item {
 			onReleased: {
 				note = tuner.note = index % 12
 				octave = tuner.octave = index / 12
-				toise_octave.index = tuner.octave - 1
+				toise_octave.index = tuner.octave
 				toise_octave.updateFlickable()
 			}
 		}
@@ -142,7 +142,7 @@ Item {
 
 			theme: main.theme
 
-			marks: [1, 2, 3, 4, 5, 6, 7, 8]
+			marks: [0, 1, 2, 3, 4, 5, 6, 7, 8]
 			min: 0
 			max: marks.length - 1
 			//nb_marks_displayed: is_portrait ? 4 : 3
@@ -152,7 +152,7 @@ Item {
 
 			//index: tuner.octave - 1
 			onReleased: {
-				tuner.octave = index + 1
+				tuner.octave = index
 				toise.octave = tuner.octave
 			}
 		}
@@ -169,9 +169,11 @@ Item {
 
 	/// update toise indexes if tuner note and octave changed from exterior
 	function update() {
+		toise.flik_enable = false
 		toise.note = tuner.note
 		toise.octave = tuner.octave
-		toise_octave.index = tuner.octave - 1
+		toise_octave.index = tuner.octave
+		toise.flik_enable = true
 	}
 
 	Component.onCompleted: update()

@@ -145,13 +145,13 @@ Item {
 			anchors.rightMargin: is_portrait ? (parent.width - width) / 2 : parent.width / 20
 			theme: main.theme
 
-			marks: [1, 2, 3, 4, 5, 6, 7, 8]
+			marks: [0, 1, 2, 3, 4, 5, 6, 7, 8]
 			nb_marks_displayed: is_portrait ? 4 : 3
 
 			width: is_portrait ? meter.width / 2 : parent.width / 6
 			height: parent.toise_h
 
-			index: tuner.octave - 1
+			index: tuner.octave
 		}
 	}
 
