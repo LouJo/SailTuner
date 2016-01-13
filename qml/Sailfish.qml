@@ -45,8 +45,6 @@ ApplicationWindow {
 			id: page
 			allowedOrientations: Orientation.All
 
-			signal togglePause()
-
 			SilicaFlickable {
 				anchors.fill: parent
 
@@ -61,14 +59,10 @@ ApplicationWindow {
 				}
 
 				TunerScreen {
+					id: screen
 					anchors.fill: parent
 					theme: Theme
 					tuner: app.tuner
-
-					MouseArea {
-						anchors.fill: parent
-						onClicked: togglePause()
-					}
 				}
 				
 			}
@@ -83,7 +77,7 @@ ApplicationWindow {
 
 			Component.onCompleted: {
 				app.tuner = tunerObject
-				togglePause.connect(app.togglePause)
+				screen.toggleRun.connect(app.toggleRun)
 			}
 		}
 	}
@@ -97,7 +91,7 @@ ApplicationWindow {
 		}
 	}
 
-	function togglePause() {
+	function toggleRun() {
 		app.userRunning = app.userRunning ? false : true
 	}
 }

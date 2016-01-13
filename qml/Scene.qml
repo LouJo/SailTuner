@@ -48,5 +48,7 @@ Image {
 	PlayerScreen {
 		tuner: tuner
 		theme: theme
+
+		onTogglePlay: tuner.playing ^= true
 	}
 }

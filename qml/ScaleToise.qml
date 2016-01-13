@@ -63,8 +63,8 @@ ToiseFlickable {
 	max: notes_en.length * 9 - 1 // si 8
 
 	onOctaveChanged: {
+		if (!flik_enable) return
 		index = note + notes_en.length * octave
 		updateFlickable()
 	}
-	onNoteChanged: console.log(note)
 }

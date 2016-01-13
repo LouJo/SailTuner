@@ -29,18 +29,14 @@ Item {
 	/// theme corresponding to Silica Theme object
 	property QtObject theme
 
+	/// called wher user clicked for play/pause
+	signal togglePlay()
+
 	anchors.fill: parent
 	property int h_margin: (height - toise.height * 2 - image_play.height) / 5
 
 	// landscape / portrait
 	property bool is_portrait: height > width
-
-	// maximum absolute deviation to display green led
-	property double deviation_ok: 0.05
-	property color led_green: "green"
-	property color led_red: "red"
-
-	property bool dev_is_ok: Math.abs(tuner.deviation) <= deviation_ok
 
 	// frequency and temperament
 	Column {
@@ -115,8 +111,8 @@ Item {
 			//octave: tuner.octave
 
 			onReleased: {
-				octave = tuner.octave = index / 12
 				note = tuner.note = index % 12
+				octave = tuner.octave = index / 12
 				toise_octave.index = tuner.octave - 1
 				toise_octave.updateFlickable()
 			}
@@ -160,6 +156,15 @@ Item {
 				toise.octave = tuner.octave
 			}
 		}
+	}
+
+	/// play/pause area
+	MouseArea {
+		anchors.top: parent.top
+		anchors.bottom: note_info.top
+		anchors.left: parent.left
+		anchors.right: parent.right
+		onClicked: togglePlay()
 	}
 
 	/// update toise indexes if tuner note and octave changed from exterior

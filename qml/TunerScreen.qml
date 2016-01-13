@@ -29,6 +29,8 @@ Item {
 	/// theme corresponding to Silica Theme object
 	property QtObject theme
 
+	signal toggleRun()
+
 	anchors.fill: parent
 	property int h_margin: (height - meter.height - toise.height) / 3
 
@@ -182,5 +184,10 @@ Item {
 		width: theme.iconSizeMedium
 		height: width
 		source: theme.icon_pause ? theme.icon_pause : "image://theme/icon-m-pause?" + theme.secondaryColor
+	}
+
+	MouseArea {
+		anchors.fill: parent
+		onClicked: toggleRun()
 	}
 }

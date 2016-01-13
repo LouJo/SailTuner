@@ -16,12 +16,15 @@
  */
 
 import QtQuick 2.0
+import QtQuick.Controls 1.0
+import QtQuick.Layouts 1.0
 import LJTuner 1.0
 import LJUtils 1.0
 
 import "."
 
 Item {
+	id: root
 	width: 600
 	height: 500
 
@@ -50,11 +53,45 @@ Item {
 			anchors.fill: parent
 			theme: theme
 			tuner: tuner
+			onToggleRun: tuner.running ^= true
+		}
+
+		MouseArea {
+			anchors.top: parent.top
+			anchors.left: parent.left
+			anchors.right: parent.right
+			height: parent.height / 8
+
+			onDoubleClicked: {
+				var win = player.createObject(player, {theme: theme, tuner: tuner})
+				win.show()
+			}
 		}
 	}
 
-	MouseArea {
-		anchors.fill: parent
-		onClicked: tuner.running = (tuner.running ^ true)
+	// player
+	Component {
+		id: player
+
+		ApplicationWindow {
+			id: player_app
+
+			width: 600
+			height: 500
+			property QtObject tuner
+			property QtObject theme
+
+			Image {
+				source: "../images/bg_portrait.png"
+				anchors.fill: parent
+			}
+			PlayerScreen {
+				tuner: player_app.tuner
+				theme: player_app.theme
+
+				anchors.fill: parent
+				onTogglePlay: tuner.playing ^= true
+			}
+		}
 	}
 }
