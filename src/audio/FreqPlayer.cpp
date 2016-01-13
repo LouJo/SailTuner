@@ -17,6 +17,7 @@
 
 #include <math.h>
 #include <stdint.h>
+//#include <iostream>
 
 #include "FreqPlayer.hpp"
 
@@ -27,16 +28,28 @@ template<typename sample_t> FreqPlayer<sample_t>::FreqPlayer(int _rate):
 	n_frame(0),
 	waveform(W_SINUS)
 {
+	k = K();
+	k_update = -1; // invalid: don't update
 }
 
 template<typename sample_t> void FreqPlayer<sample_t>::Reset()
 {
 	n_frame = 0;
+	if (k_update != -1) {
+		k = k_update;
+		k_update = -1;
+	}
+}
+
+template<typename sample_t> double FreqPlayer<sample_t>::K() const
+{
+	return freq / rate * M_PI * 2;
 }
 
 template<typename sample_t> void FreqPlayer<sample_t>::SetFreq(double freq)
 {
 	this->freq = freq;
+	k_update = K();
 }
 
 template<typename sample_t> void FreqPlayer<sample_t>::SetVolume(double volume)
@@ -49,7 +62,21 @@ template<> double FreqPlayer<double>::max() { return 1; }
 
 template<typename sample_t> double FreqPlayer<sample_t>::radius()
 {
-	return (double) (n_frame++) * freq / rate * M_PI * 2;
+	double ret = (n_frame++) * k;
+
+	/* to update frequency factor, wait current radius to go to beginning
+	 * in interval [0, 2PI]
+	 */
+	if (k_update != -1) {
+		double a = fmod(ret, M_PI * 1);
+		double b = fmod(n_frame * k, M_PI * 2);
+		if (b < a) { // next frame go back to beginning of circle
+			n_frame = 0;
+			k = k_update;
+			k_update = -1;
+		}
+	}
+	return ret;
 }
 
 template<typename sample_t> sample_t FreqPlayer<sample_t>::AudioFrame()

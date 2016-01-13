@@ -120,7 +120,7 @@ void Scale::ConstructEqualTemperament()
 	updateScale();
 }
 
-double Scale::GetLa()
+double Scale::GetLa() const
 {
 	return actualLa;
 }
@@ -140,12 +140,12 @@ void Scale::SetLa(double la)
 	if (freq_setted) updateScale();
 }
 
-double Scale::GetNoteFreq(int note, int octave)
+double Scale::GetNoteFreq(int note, int octave) const
 {
 	assert(note >= 0 && note < nbNote);
 	double f = actualNoteFreq[note];
 	octave -= 4;
-	if (octave < 0) f /= 1 << octave;
+	if (octave < 0) f /= 1 << (-octave);
 	else if (octave > 0) f *= 1 << octave;
 
 	return f;

@@ -273,6 +273,7 @@ void TunerWorker::Entry()
 						);
 
 				// update frequency to update from previous tuner results
+				player->Reset();
 				player->SetFreq(pitchDetection->GetNoteFreq(result.note, result.octave));
 			}
 

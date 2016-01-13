@@ -40,7 +40,11 @@ template<typename sample_t> class FreqPlayer {
 	int n_frame;
 	/// wave form
 	WAVEFORM waveform;
+	/// pre computed factor
+	double k, k_update;
 
+	/// return k computed
+	double K() const;
 	/// return the max sample_t
 	sample_t max();
 	/// return the current radius
