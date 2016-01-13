@@ -31,6 +31,8 @@ ApplicationWindow {
 	allowedOrientations: Orientation.All
 
 	property bool userRunning: true
+	property bool userPlaying: false
+
 	property int dbFontSize: 100
 	property QtObject tuner
 
@@ -40,10 +42,23 @@ ApplicationWindow {
 		object: Config
 	}
 
+	Tuner {
+		id: tunerItem
+		temperament_idx: Config.temperament_idx
+		la: Config.la
+
+		running: Qt.application.active && app.userRunning
+		playing: Qt.application.active && app.userPlaying
+
+		Component.onCompleted: app.tuner = tunerItem
+	}
+
 	initialPage: Component {
 		Page {
 			id: page
 			allowedOrientations: Orientation.All
+			property bool running: true
+			property bool tunerRunning: running && status == PageStatus.Active
 
 			SilicaFlickable {
 				anchors.fill: parent
@@ -63,24 +78,50 @@ ApplicationWindow {
 					anchors.fill: parent
 					theme: Theme
 					tuner: app.tuner
+
+					onToggleRun: page.running ^= true
 				}
-				
 			}
+			onTunerRunningChanged: app.userRunning = tunerRunning
 
-			Tuner {
-				id: tunerObject
-				running: Qt.application.active && page.status == PageStatus.Active && app.userRunning
-				temperament_idx: Config.temperament_idx
-				la: Config.la
-			}
-
-
-			Component.onCompleted: {
-				app.tuner = tunerObject
-				screen.toggleRun.connect(app.toggleRun)
-			}
 		}
 	}
+
+	Component {
+		id: player
+
+		Page {
+			id: page
+			allowedOrientations: Orientation.All
+			property bool playing: false
+			property bool tunerPlaying: playing && status == PageStatus.Active
+
+			SilicaFlickable {
+				anchors.fill: parent
+
+				PullDownMenu {
+					MenuItem {
+						text: qsTr("Configuration")
+						onClicked: {
+							var confpage = pageStack.push(Qt.resolvedUrl("ConfigurePageSailfish.qml"), { tuner: app.tuner })
+							confpage.configChanged.connect(saver.save)
+						}
+					}
+				}
+
+				PlayerScreen {
+					id: screen
+					anchors.fill: parent
+					theme: Theme
+					tuner: app.tuner
+
+					onTogglePlay: page.playing ^= true
+				}
+			}
+			onTunerPlayingChanged: app.userPlaying = tunerPlaying
+		}
+	}
+
 
 	cover: Component {
 		CoverBackground {
@@ -91,7 +132,5 @@ ApplicationWindow {
 		}
 	}
 
-	function toggleRun() {
-		app.userRunning = app.userRunning ? false : true
-	}
+	Component.onCompleted: pageStack.pushAttached(player)
 }
