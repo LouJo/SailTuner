@@ -17,13 +17,13 @@
 
 #include <math.h>
 #include <stdint.h>
-//#include <iostream>
+#include <iostream>
 
 #include "FreqPlayer.hpp"
 
 template<typename sample_t> FreqPlayer<sample_t>::FreqPlayer(int _rate):
 	freq(440),
-	volume(0.2),
+	volume(0.5),
 	rate(_rate),
 	n_frame(0),
 	waveform(W_SINUS)
@@ -62,7 +62,7 @@ template<> double FreqPlayer<double>::max() { return 1; }
 
 template<typename sample_t> double FreqPlayer<sample_t>::radius()
 {
-	double ret = (n_frame++) * k;
+	double ret = (double) (n_frame++) * k;
 
 	/* to update frequency factor, wait current radius to go to beginning
 	 * in interval [0, 2PI]
@@ -83,7 +83,7 @@ template<typename sample_t> sample_t FreqPlayer<sample_t>::AudioFrame()
 {
 	switch (waveform) {
 	case W_SINUS:
-	return (double) sin(radius()) * max();
+	return (double) sin(radius()) * max() * volume;
 
 	default:
 	return 0;
