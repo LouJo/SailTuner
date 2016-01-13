@@ -36,7 +36,7 @@ class Tuner : public QObject {
 	Q_PROPERTY(QStringList temperament_list READ GetTemperamentList NOTIFY temperamentListChanged)
 	Q_PROPERTY(double la READ GetLa WRITE SetLa NOTIFY laChanged)
 
-	private:
+	protected:
 	TunerWorker *worker;
 	QThread workerThread;
 
@@ -51,7 +51,7 @@ class Tuner : public QObject {
 	~Tuner();
 
 	bool GetPlaying();
-	void SetPlaying(bool p);
+	virtual void SetPlaying(bool p);
 	bool GetRunning();
 	void SetRunning(bool r);
 	double GetFreq();

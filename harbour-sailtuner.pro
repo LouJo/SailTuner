@@ -1,11 +1,13 @@
 QT += qml quick gui multimedia dbus
 TARGET = harbour-sailtuner
 
-CONFIG += c++11 link_pkgconfig sailfishapp sailfishapp_i18n sailfishapp_no_deploy_qml
+CONFIG += c++11 qt link_pkgconfig sailfishapp sailfishapp_i18n sailfishapp_no_deploy_qml
 
 DEFINES += TARGET=\""$(TARGET")\"
 
-PKGCONFIG += libpulse-simple
+## see rpm/Makefile for installing libpulse and libresource
+
+PKGCONFIG += libpulse-simple libresource
 
 RESOURCES += \
 	qml/sailfish.qrc \
@@ -16,6 +18,7 @@ SOURCES += \
 	src/PitchDetection.cpp \
 	src/ObjectSaver.cpp \
 	src/Tuner.cpp \
+	src/TunerSailfish.cpp \
 	src/TunerWorker.cpp \
 	src/audio/FreqPlayer.cpp \
 	src/audio/LinearFilter.cpp \
@@ -28,6 +31,7 @@ HEADERS += \
 	src/ObjectSaver.hpp \
 	src/Tuner.cpp \
 	src/Tuner.hpp \
+	src/TunerSailfish.hpp \
 	src/TunerWorker.hpp \
 	src/audio/FreqPlayer.hpp \
 	src/audio/LinearFilter.hpp \
