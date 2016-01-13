@@ -24,6 +24,7 @@ import QtQuick 2.0
  */
 
 Toise {
+	id: toise_flickable
 	property bool flik_enable: true
 
 	property int multiple: index % nb_marks
@@ -31,8 +32,8 @@ Toise {
 	property double p_min: index2pos(min)
 	property double p_max: index2pos(max)
 
-
-	animation_enabled: false
+	signal released()
+	//animation_enabled: false
 
 	MouseArea {
 		property int refX: 0
@@ -43,6 +44,7 @@ Toise {
 		anchors.fill: parent
 
 		onPressed: {
+			animation_enabled = false
 			refX = mouseX
 			refPos = position
 		}
@@ -58,10 +60,16 @@ Toise {
 			first_mark = Math.floor(position) % nb_marks
 		}
 		onReleased: {
-			var p = index2pos(index)
-			position = p
-			delta = position - Math.floor(position)
-			//console.log("index:" + index)
+			updateFlickable()
+			animation_enabled = true
+			toise_flickable.released()
 		}
+	}
+
+	function updateFlickable() {
+		var p = index2pos(index)
+		delta = Qt.binding(function() { return position - Math.floor(position) })
+		first_mark = Qt.binding(function() { return Math.floor(position) % nb_marks })
+		position = p
 	}
 }

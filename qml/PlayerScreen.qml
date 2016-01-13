@@ -111,10 +111,15 @@ Item {
 			width: parent.width * 0.8
 			height: parent.toise_h
 
-			note: tuner.note
-			octave: tuner.octave
+			//note: tuner.note
+			//octave: tuner.octave
 
-			onMultipleChanged: tuner.octave = index / 12
+			onReleased: {
+				octave = tuner.octave = index / 12
+				note = tuner.note = index % 12
+				toise_octave.index = tuner.octave - 1
+				toise_octave.updateFlickable()
+			}
 		}
 
 		Text {
@@ -132,6 +137,7 @@ Item {
 
 		// octave toise
 		ToiseFlickable {
+			id: toise_octave
 			anchors.top: main.is_portrait ? title_octave.bottom : toise.bottom
 			anchors.topMargin: parent.margin_h
 
@@ -148,11 +154,20 @@ Item {
 			width: parent.width * 0.6
 			height: parent.toise_h
 
-			index: tuner.octave - 1
-			onIndexChanged: {
-			//	tuner.note = (tuner.note % 12) * (index + 1)
-			//	tuner.octave = index + 1
+			//index: tuner.octave - 1
+			onReleased: {
+				tuner.octave = index + 1
+				toise.octave = tuner.octave
 			}
 		}
 	}
+
+	/// update toise indexes if tuner note and octave changed from exterior
+	function update() {
+		toise.note = tuner.note
+		toise.octave = tuner.octave
+		toise_octave.index = tuner.octave - 1
+	}
+
+	Component.onCompleted: update()
 }
