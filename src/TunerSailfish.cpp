@@ -21,54 +21,35 @@
 
 #include "TunerSailfish.hpp"
 
+TunerSailfish::TunerSailfish()
+{
+	r_set = audioresource_init(AUDIO_RESOURCE_MEDIA, g_grant_cb, this);
+}
+
 TunerSailfish::~TunerSailfish()
 {
-	// release resource if needed
-	if (r_set) {
-		resource_set_destroy(r_set);
-		r_set = nullptr;
-		r_granted = false;
-	}
+	audioresource_free(r_set);
 }
 
-void TunerSailfish::g_advice_cb(resource_set_t *resource_set, uint32_t resources, void *data)
+void TunerSailfish::g_grant_cb(audioresource_t *resource_set, bool acquired, void *data)
 {
-	((TunerSailfish*) data)->advice_cb(resource_set, resources);
+	((TunerSailfish*) data)->grant_cb(resource_set, acquired);
 }
 
-void TunerSailfish::g_grant_cb(resource_set_t *resource_set, uint32_t resources, void *data)
-{
-	((TunerSailfish*) data)->grant_cb(resource_set, resources);
-}
-
-void TunerSailfish::advice_cb(resource_set_t *resource_set, uint32_t resources)
+void TunerSailfish::grant_cb(audioresource_t *resource_set, bool acquired)
 {
 	(void) resource_set;
-	std::cout << __func__ << " " << resources << std::endl;
-}
+	std::cout << __func__ << " " << acquired << std::endl;
 
-void TunerSailfish::grant_cb(resource_set_t *resource_set, uint32_t resources)
-{
-	(void) resource_set;
-	std::cout << __func__ << " " << resources << std::endl;
-
-	if (resources & RESOURCE_AUDIO_PLAYBACK) {
+	if (acquired) {
 		r_granted = true;
 		if (playing) worker->SetPlaying(true);
+		emit playingChanged();
 	}
 	else {
 		r_granted = false;
-		if (!playing) worker->SetPlaying(false);
+		if (playing) worker->SetPlaying(false);
 	}
-}
-
-void TunerSailfish::get_resource()
-{
-	if (r_set) return;
-	r_set = resource_set_create("player", RESOURCE_AUDIO_PLAYBACK, 0, 0, g_grant_cb, this);
-	resource_set_configure_advice_callback(r_set, g_advice_cb, this);
-	resource_set_configure_audio (r_set, "player", getpid(), "*");
-	resource_set_acquire (r_set);
 }
 
 void TunerSailfish::SetPlaying(bool p)
@@ -76,12 +57,13 @@ void TunerSailfish::SetPlaying(bool p)
 	if (p == playing) return;
 	playing = p;
 
-	// get resource only the first playback start
-	if (p && !r_set) get_resource();
-
-	// if not granted, don't start, and don't stop because not started
-	if (!r_granted) return;
-
-	worker->SetPlaying(p);
-	emit playingChanged();
+	if (p) {
+		audioresource_acquire(r_set);
+	}
+	else {
+		if (r_granted) worker->SetPlaying(p);
+		audioresource_release(r_set);
+		r_granted = false;
+		emit playingChanged();
+	}
 }

@@ -281,7 +281,7 @@ void TunerWorker::Entry()
 			if (pa_simple_write(p_play, buffer, nbSampleBuffer << 1, nullptr) < 0) {
 				cerr << "audio write failed" << endl;
 			}
-			else cout << "audio written" << endl;
+			//else cout << "audio written" << endl;
 		} // playing
 
 		// prevent screen blanking

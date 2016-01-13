@@ -53,7 +53,7 @@ Q_DECL_EXPORT int main(int argc, char* argv[])
 		TunerWorker::set_record(argv[2]);
 	}
 
-	qmlRegisterType<Tuner>("harbour.sailtuner.tuner", 1, 0, "TunerSailfish");
+	qmlRegisterType<TunerSailfish>("harbour.sailtuner.tuner", 1, 0, "Tuner");
 	qmlRegisterType<ObjectSaver>("harbour.sailtuner.objectsaver", 1, 0, "ObjectSaver");
 
 	Main *appli = new Main(argc, argv);

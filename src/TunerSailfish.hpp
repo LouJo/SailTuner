@@ -15,7 +15,7 @@
  *
  */
 
-#include <resource.h>
+#include <audioresource.h>
 #include "Tuner.hpp"
 
 /** Tuner object
@@ -23,19 +23,15 @@
   */
 class TunerSailfish : public Tuner {
 	private:
-	resource_set_t *r_set = nullptr;
+	audioresource_t *r_set;
 	bool r_granted = false;
 
-	/// callbacks from resource system
-	static void g_advice_cb(resource_set_t *resource_set, uint32_t resources, void *data);
-	static void g_grant_cb(resource_set_t *resource_set, uint32_t resources, void *data);
-	void advice_cb(resource_set_t *resource_set, uint32_t resources);
-	void grant_cb(resource_set_t *resource_set, uint32_t resources);
-
-	/// main function to get resources
-	void get_resource();
+	/// callback from resource system
+	static void g_grant_cb(audioresource_t *resource_set, bool acquired, void *data);
+	void grant_cb(audioresource_t *resource_set, bool acquired);
 
 	public:
+	TunerSailfish();
 	~TunerSailfish();
 	void SetPlaying(bool p);
 };

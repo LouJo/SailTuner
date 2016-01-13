@@ -5,9 +5,9 @@ CONFIG += c++11 qt link_pkgconfig sailfishapp sailfishapp_i18n sailfishapp_no_de
 
 DEFINES += TARGET=\""$(TARGET")\"
 
-## see rpm/Makefile for installing libpulse and libresource
+## see rpm/Makefile for installing libpulse and libaudioresource
 
-PKGCONFIG += libpulse-simple libresource
+PKGCONFIG += libpulse-simple audioresource
 
 RESOURCES += \
 	qml/sailfish.qrc \
