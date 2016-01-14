@@ -197,7 +197,7 @@ void TunerWorker::Entry()
 			blank_prevent(false);
 			bool waked;
 			while (!running && !playing && !quit) {
-				waked = condition.wait(&mutex, p_play ? 1000000 : ULONG_MAX);
+				waked = condition.wait(&mutex, p_play ? 1000 : ULONG_MAX);
 				// free playing now
 				if (!waked && p_play) {
 					pa_simple_free(p_play);
