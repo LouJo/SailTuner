@@ -26,7 +26,7 @@ template<typename sample_t> FreqPlayer<sample_t>::FreqPlayer(int _rate):
 	volume(0.5),
 	rate(_rate),
 	n_frame(0),
-	waveform(W_SINUS)
+	waveform(W_TRIANGLE)
 {
 	k = K();
 	k_update = -1; // invalid: don't update
@@ -68,13 +68,31 @@ template<typename sample_t> double FreqPlayer<sample_t>::radius()
 
 template<typename sample_t> sample_t FreqPlayer<sample_t>::AudioFrame()
 {
+	double r = radius();
+	double v;
+
 	switch (waveform) {
 	case W_SINUS:
-	return (double) sin(radius()) * max() * volume;
+		v = sin(r);
+		break;
+
+	case W_TRIANGLE:
+		r = fmod(r, M_PI * 2);
+
+		if (r <= M_PI / 2) v = r;
+		else if (r <= M_PI * 1.5) v = M_PI - r;
+		else v = r - M_PI * 2;
+
+		v /= (M_PI / 2);
+		break;
+
 
 	default:
-	return 0;
+		v = 0;
+		break;
 	}
+
+	return v * max() * volume;
 }
 
 template<typename sample_t> void FreqPlayer<sample_t>::WriteAudio(sample_t *out, int nb_frame, bool stop)

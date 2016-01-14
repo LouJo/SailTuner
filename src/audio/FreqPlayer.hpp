@@ -27,7 +27,7 @@
 template<typename sample_t> class FreqPlayer {
 	public:
 	/// waveform style
-	enum WAVEFORM { W_SINUS };
+	enum WAVEFORM { W_SINUS, W_TRIANGLE };
 
 	private:
 	/// current frequency
