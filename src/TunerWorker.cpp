@@ -190,7 +190,11 @@ void TunerWorker::Entry()
 			pa_simple_free(p_record);
 			p_record = nullptr;
 		}
-		// free playing after a delay of inactivity to avoid clac
+		// free playing if record running, after a delay
+		if (play_stop_counter >= 10 && p_play) {
+			pa_simple_free(p_play);
+			p_play = nullptr;
+		}
 
 		// wait for running
 		if (!running && !playing) {
@@ -308,6 +312,10 @@ void TunerWorker::Entry()
 			if (stop_counter) play_stop_counter = stop_counter + 1;
 
 		} // playing
+		else {
+			// increment if record running
+			play_stop_counter++;
+		}
 
 		// prevent screen blanking
 		nb_sample_running += nbSampleBuffer;
