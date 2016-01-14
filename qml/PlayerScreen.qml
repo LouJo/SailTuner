@@ -38,6 +38,8 @@ Item {
 	// landscape / portrait
 	property bool is_portrait: height > width
 
+	property bool toisepressed: toise.pressed || toise_octave.pressed
+
 	// frequency and temperament
 	Column {
 		id: freq_temp

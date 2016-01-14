@@ -32,10 +32,14 @@ Toise {
 	property double p_min: index2pos(min)
 	property double p_max: index2pos(max)
 
+	property alias pressed: area.pressed
+
 	signal released()
 	//animation_enabled: false
 
 	MouseArea {
+		id: area
+
 		property int refX: 0
 		property double refPos: parent.position
 

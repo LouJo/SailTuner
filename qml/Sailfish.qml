@@ -96,8 +96,12 @@ ApplicationWindow {
 			property bool playing: false
 			property bool tunerPlaying: playing && status == PageStatus.Active
 
+			backNavigation: !screen.toisepressed
+
 			SilicaFlickable {
+				id: flick
 				anchors.fill: parent
+				interactive: !screen.toisepressed
 
 				PullDownMenu {
 					MenuItem {
