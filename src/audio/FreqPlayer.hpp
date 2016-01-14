@@ -46,6 +46,8 @@ template<typename sample_t> class FreqPlayer {
 	sample_t last_frame;
 	/// number of hamonics for waveforms (W_HARMONIC only)
 	int nb_harmonics = 5;
+	/// max harmonic to play given current frequency
+	double max_harmonic_freq;
 
 	/// return k computed
 	double K() const;

@@ -27,6 +27,7 @@ template<typename sample_t> FreqPlayer<sample_t>::FreqPlayer(int _rate):
 {
 	k = K();
 	k_update = -1; // invalid: don't update
+	max_harmonic_freq = rate / 2;
 }
 
 template<typename sample_t> void FreqPlayer<sample_t>::Reset()
@@ -92,7 +93,8 @@ template<typename sample_t> sample_t FreqPlayer<sample_t>::AudioFrame()
 
 	case W_HARMONIC:
 		v = 0;
-		for (i = 1; i <= nb_harmonics; i++) v += sin(r * i) / i;
+		for (i = 1; i <= nb_harmonics; i++) if (freq * i < max_harmonic_freq)
+			v += sin(r * i) / i;
 		break;
 
 	default:
