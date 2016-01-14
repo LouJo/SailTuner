@@ -173,10 +173,14 @@ Item {
 
 	/// update toise indexes if tuner note and octave changed from exterior
 	function update() {
+		console.log("update")
 		toise.flik_enable = false
 		toise.note = tuner.note
 		toise.octave = tuner.octave
 		toise_octave.index = tuner.octave
+		toise.index = tuner.note + 12 * tuner.octave
+		toise.updateFlickable()
+		toise_octave.updateFlickable()
 		toise.flik_enable = true
 	}
 

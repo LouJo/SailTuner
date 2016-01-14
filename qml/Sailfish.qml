@@ -123,6 +123,10 @@ ApplicationWindow {
 				}
 			}
 			onTunerPlayingChanged: app.userPlaying = tunerPlaying
+
+			onStatusChanged: {
+				if (status == PageStatus.Active) screen.update()
+			}
 		}
 	}
 
