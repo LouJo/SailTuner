@@ -21,6 +21,14 @@
 
 #include "FreqPlayer.hpp"
 
+#ifndef min
+#define min(a,b) (a<b?a:b)
+#endif
+
+#ifndef max
+#define max(a,b) (a>b?a:b)
+#endif
+
 template<typename sample_t> FreqPlayer<sample_t>::FreqPlayer(int _rate):
 	rate(_rate),
 	n_frame(0)
@@ -28,6 +36,7 @@ template<typename sample_t> FreqPlayer<sample_t>::FreqPlayer(int _rate):
 	k = K();
 	k_update = -1; // invalid: don't update
 	max_harmonic_freq = rate / 2;
+	freq2volume();
 }
 
 template<typename sample_t> void FreqPlayer<sample_t>::Reset()
@@ -37,6 +46,7 @@ template<typename sample_t> void FreqPlayer<sample_t>::Reset()
 	if (k_update != -1) {
 		k = k_update;
 		k_update = -1;
+		freq2volume();
 	}
 }
 
@@ -62,8 +72,11 @@ template<typename sample_t> void FreqPlayer<sample_t>::SetWaveform(WAVEFORM form
 	waveform = form;
 }
 
-template<> int16_t FreqPlayer<int16_t>::max() { return INT16_MAX; }
-template<> double FreqPlayer<double>::max() { return 1; }
+template<> int16_t FreqPlayer<int16_t>::sample_min() { return INT16_MIN; }
+template<> double FreqPlayer<double>::sample_min() { return -1; }
+
+template<> int16_t FreqPlayer<int16_t>::sample_max() { return INT16_MAX; }
+template<> double FreqPlayer<double>::sample_max() { return 1; }
 
 template<typename sample_t> double FreqPlayer<sample_t>::radius()
 {
@@ -102,7 +115,13 @@ template<typename sample_t> sample_t FreqPlayer<sample_t>::AudioFrame()
 		break;
 	}
 
-	return v * max() * volume;
+	return max(min(v * sample_max() * volume, sample_max()), sample_min());
+}
+
+template<typename sample_t> void FreqPlayer<sample_t>::freq2volume()
+{
+	if (volume_adaptative) volume = min(volume_max, max(volume_min, (freq_volume_min - freq) / (freq_volume_min - freq_volume_max) * (volume_max - volume_min) + volume_min));
+	std::cerr << "volume " << volume << std::endl;
 }
 
 template<typename sample_t> void FreqPlayer<sample_t>::WriteAudio(sample_t *out, int nb_frame, bool stop)
@@ -119,6 +138,7 @@ template<typename sample_t> void FreqPlayer<sample_t>::WriteAudio(sample_t *out,
 				n_frame = 0;
 				k = k_update;
 				k_update = -1;
+				freq2volume();
 				v = AudioFrame();
 			}
 			else if (stop) {

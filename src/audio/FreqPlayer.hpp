@@ -30,10 +30,19 @@ template<typename sample_t> class FreqPlayer {
 	enum WAVEFORM { W_SINUS, W_TRIANGLE, W_HARMONIC };
 
 	private:
+	/// frequencies for min and max volumes
+	static constexpr double freq_volume_min = 1200;
+	static constexpr double freq_volume_max = 120;
+
 	/// current frequency
 	double freq = 440;
 	/// current volume (linear)
 	double volume = 0.5;
+	/// volume min and max
+	double volume_min = 0.5;
+	double volume_max = 1;
+	/// if volume is adaptative to freq (lower -> volume higher)
+	bool volume_adaptative = true;
 	/// audio rate
 	int rate;
 	/// current frame nb
@@ -52,9 +61,13 @@ template<typename sample_t> class FreqPlayer {
 	/// return k computed
 	double K() const;
 	/// return the max sample_t
-	sample_t max();
+	sample_t sample_min();
+	/// return the max sample_t
+	sample_t sample_max();
 	/// return the current radius
 	double radius();
+	/// return volume if adaptative
+	void freq2volume();
 
 	public:
 	FreqPlayer(int rate);
