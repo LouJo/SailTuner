@@ -27,23 +27,25 @@
 template<typename sample_t> class FreqPlayer {
 	public:
 	/// waveform style
-	enum WAVEFORM { W_SINUS, W_TRIANGLE };
+	enum WAVEFORM { W_SINUS, W_TRIANGLE, W_HARMONIC };
 
 	private:
 	/// current frequency
-	double freq;
+	double freq = 440;
 	/// current volume (linear)
-	double volume;
+	double volume = 0.5;
 	/// audio rate
 	int rate;
 	/// current frame nb
 	int n_frame;
 	/// wave form
-	WAVEFORM waveform;
+	WAVEFORM waveform = W_HARMONIC;
 	/// pre computed factor
 	double k, k_update;
 	// last frame written
 	sample_t last_frame;
+	/// number of hamonics for waveforms (W_HARMONIC only)
+	int nb_harmonics = 5;
 
 	/// return k computed
 	double K() const;
@@ -66,6 +68,8 @@ template<typename sample_t> class FreqPlayer {
 	void SetFreq(double freq);
 	/// set current volume
 	void SetVolume(double volume);
+	/// set waveform
+	void SetWaveform(WAVEFORM form, int nb_harmonics);
 };
 
 #endif

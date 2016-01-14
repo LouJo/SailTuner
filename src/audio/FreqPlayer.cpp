@@ -22,11 +22,8 @@
 #include "FreqPlayer.hpp"
 
 template<typename sample_t> FreqPlayer<sample_t>::FreqPlayer(int _rate):
-	freq(440),
-	volume(0.5),
 	rate(_rate),
-	n_frame(0),
-	waveform(W_TRIANGLE)
+	n_frame(0)
 {
 	k = K();
 	k_update = -1; // invalid: don't update
@@ -58,6 +55,12 @@ template<typename sample_t> void FreqPlayer<sample_t>::SetVolume(double volume)
 	this->volume = volume;
 }
 
+template<typename sample_t> void FreqPlayer<sample_t>::SetWaveform(WAVEFORM form, int nb_harmonics)
+{
+	if (form == W_HARMONIC) this->nb_harmonics = nb_harmonics;
+	waveform = form;
+}
+
 template<> int16_t FreqPlayer<int16_t>::max() { return INT16_MAX; }
 template<> double FreqPlayer<double>::max() { return 1; }
 
@@ -70,6 +73,7 @@ template<typename sample_t> sample_t FreqPlayer<sample_t>::AudioFrame()
 {
 	double r = radius();
 	double v;
+	int i;
 
 	switch (waveform) {
 	case W_SINUS:
@@ -86,6 +90,10 @@ template<typename sample_t> sample_t FreqPlayer<sample_t>::AudioFrame()
 		v /= (M_PI / 2);
 		break;
 
+	case W_HARMONIC:
+		v = 0;
+		for (i = 1; i <= nb_harmonics; i++) v += sin(r * i) / i;
+		break;
 
 	default:
 		v = 0;
