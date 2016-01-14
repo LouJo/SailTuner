@@ -71,7 +71,7 @@ class Tuner : public QObject {
 	// slots from worker
 	void ResultUpdated(const PitchDetection::PitchResult &result);
 	void TemperamentListUpdated(const QStringList &list);
-	void SetNoteOctave(int note, int octave);
+	void setNoteOctave(int note, int octave);
 
 	signals:
 	// signals to UI

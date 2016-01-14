@@ -43,6 +43,8 @@ Image {
 		property int temperament_idx: 0
 		property bool running: false
 		property bool playing: false
+
+		function setNoteOctave(n, o) {}
 	}
 
 	PlayerScreen {
