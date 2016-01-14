@@ -55,6 +55,7 @@ static void blank_prevent(bool prevent)
 }
 
 TunerWorker::TunerWorker() :
+	play_stop_counter(0),
 	running(false),
 	playing(false),
 	quit(false),
@@ -92,8 +93,15 @@ void TunerWorker::SetPlaying(bool p)
 	cerr << __func__ << " " << p << endl;
 	if (p == playing) return;
 	mutex.lock();
-	playing = p;
-	if (p) condition.wakeOne();
+	if (p) {
+		playing = p;
+		play_stop_counter = 0;
+		condition.wakeOne();
+	}
+	else {
+		// stop after a frame
+		play_stop_counter = 1;
+	}
 	mutex.unlock();
 }
 
@@ -167,21 +175,27 @@ void TunerWorker::Entry()
 	while (1) {
 
 		mutex.lock();
+		// stop playing after a frame
+		if (play_stop_counter >= 2) playing = false;
+
 		// free pulseaudio if not running
 		if (!running && p_record) {
 			pa_simple_free(p_record);
-			p_record = NULL;
+			p_record = nullptr;
 		}
-		if (!playing && p_play) {
-			pa_simple_free(p_play);
-			p_play = NULL;
-		}
+		// free playing after a delay of inactivity to avoid clac
 
 		// wait for running
 		if (!running && !playing) {
 			blank_prevent(false);
+			bool waked;
 			while (!running && !playing && !quit) {
-				condition.wait(&mutex);
+				waked = condition.wait(&mutex, p_play ? 1000000 : ULONG_MAX);
+				// free playing now
+				if (!waked && p_play) {
+					pa_simple_free(p_play);
+					p_play = nullptr;
+				}
 			}
 			cerr << "wake-up" << endl;
 			nb_sample_running = 0;
@@ -277,11 +291,15 @@ void TunerWorker::Entry()
 				player->SetFreq(pitchDetection->GetNoteFreq(result.note, result.octave));
 			}
 
-			player->WriteAudio(buffer, nbSampleBuffer);
+			const int stop_counter = play_stop_counter;
+
+			player->WriteAudio(buffer, nbSampleBuffer, stop_counter > 0);
 			if (pa_simple_write(p_play, buffer, nbSampleBuffer << 1, nullptr) < 0) {
 				cerr << "audio write failed" << endl;
 			}
-			//else cout << "audio written" << endl;
+
+			if (stop_counter) play_stop_counter = stop_counter + 1;
+
 		} // playing
 
 		// prevent screen blanking

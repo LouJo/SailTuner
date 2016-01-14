@@ -35,6 +35,7 @@ template<typename sample_t> FreqPlayer<sample_t>::FreqPlayer(int _rate):
 template<typename sample_t> void FreqPlayer<sample_t>::Reset()
 {
 	n_frame = 0;
+	last_frame = 0;
 	if (k_update != -1) {
 		k = k_update;
 		k_update = -1;
@@ -62,21 +63,7 @@ template<> double FreqPlayer<double>::max() { return 1; }
 
 template<typename sample_t> double FreqPlayer<sample_t>::radius()
 {
-	double ret = (double) (n_frame++) * k;
-
-	/* to update frequency factor, wait current radius to go to beginning
-	 * in interval [0, 2PI]
-	 */
-	if (k_update != -1) {
-		double a = fmod(ret, M_PI * 1);
-		double b = fmod(n_frame * k, M_PI * 2);
-		if (b < a) { // next frame go back to beginning of circle
-			n_frame = 0;
-			k = k_update;
-			k_update = -1;
-		}
-	}
-	return ret;
+	return (double) (n_frame++) * k;
 }
 
 template<typename sample_t> sample_t FreqPlayer<sample_t>::AudioFrame()
@@ -90,9 +77,34 @@ template<typename sample_t> sample_t FreqPlayer<sample_t>::AudioFrame()
 	}
 }
 
-template<typename sample_t> void FreqPlayer<sample_t>::WriteAudio(sample_t *out, int nb_frame)
+template<typename sample_t> void FreqPlayer<sample_t>::WriteAudio(sample_t *out, int nb_frame, bool stop)
 {
-	while (nb_frame--) *out++ = AudioFrame();
+	sample_t v;
+	const bool to_update = (k_update != -1) || stop;
+
+	while (nb_frame--) {
+		v = AudioFrame();
+		if (to_update && (v >= 0 && last_frame < 0)) {
+			// zero cross. update now.
+			if (k_update != -1) {
+				// update frequency
+				n_frame = 0;
+				k = k_update;
+				k_update = -1;
+				v = AudioFrame();
+			}
+			else if (stop) {
+				std::cerr << "stop audio" << std::endl;
+				// finish with 0s
+				*out++ = 0;
+				while (nb_frame--) *out++ = 0;
+				last_frame = 0;
+				return;
+			}
+		}
+		*out++ = v;
+		last_frame = v;
+	}
 }
 
 // instanciation for int16

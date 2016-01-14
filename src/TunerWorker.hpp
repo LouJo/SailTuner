@@ -45,6 +45,7 @@ class TunerWorker : public QObject {
 	QMutex mutex;
 	QWaitCondition condition;
 
+	int play_stop_counter;
 	bool running, playing, quit;
 
 	// to update vars

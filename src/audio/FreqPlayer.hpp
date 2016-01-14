@@ -42,6 +42,8 @@ template<typename sample_t> class FreqPlayer {
 	WAVEFORM waveform;
 	/// pre computed factor
 	double k, k_update;
+	// last frame written
+	sample_t last_frame;
 
 	/// return k computed
 	double K() const;
@@ -59,7 +61,7 @@ template<typename sample_t> class FreqPlayer {
 	/// get next audio frame
 	inline sample_t AudioFrame();
 	/// write audio buffer
-	void WriteAudio(sample_t *out, int nb_frame);
+	void WriteAudio(sample_t *out, int nb_frame, bool stop = false);
 	/// set current frequency
 	void SetFreq(double freq);
 	/// set current volume
