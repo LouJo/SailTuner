@@ -111,9 +111,11 @@ Item {
 			//octave: tuner.octave
 
 			onReleased: {
-				note = tuner.note = index % 12
-				octave = tuner.octave = index / 12
-				toise_octave.index = tuner.octave
+				note = index % 12
+				octave = index / 12
+				toise_octave.index = octave
+				// set octave and note atomically
+				tuner.SetNoteOctave(note, octave)
 				toise_octave.updateFlickable()
 			}
 		}

@@ -67,6 +67,7 @@ class TunerWorker : public QObject {
 	void SetOctave(int octave);
 	void Entry();
 	void Quit();
+	void SetNoteOctave(int note, int octave);
 
 	/// write a file with raw audio
 	static void set_record(const char *filename_record);

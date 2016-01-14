@@ -134,10 +134,17 @@ void TunerWorker::SetNote(int note)
 	mutex.unlock();
 }
 
-
 void TunerWorker::SetOctave(int octave)
 {
 	mutex.lock();
+	octave_to_update = octave;
+	mutex.unlock();
+}
+
+void TunerWorker::SetNoteOctave(int note, int octave)
+{
+	mutex.lock();
+	note_to_update = note;
 	octave_to_update = octave;
 	mutex.unlock();
 }

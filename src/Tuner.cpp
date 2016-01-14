@@ -104,6 +104,14 @@ void Tuner::SetNote(int note)
 	emit resultChanged();
 }
 
+void Tuner::SetNoteOctave(int note, int octave)
+{
+	result.note = note;
+	result.octave = octave;
+	worker->SetNoteOctave(note, octave);
+	emit resultChanged();
+}
+
 double Tuner::GetDeviation()
 {
 	return result.deviation;
