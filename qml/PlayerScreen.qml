@@ -62,7 +62,7 @@ Item {
 	Image {
 		id: image_play
 		anchors.top: parent.top
-		anchors.topMargin: h_margin
+		anchors.topMargin: h_margin * 1.4
 		anchors.horizontalCenter: parent.horizontalCenter
 		width: theme.iconSizeLarge
 		height: width
