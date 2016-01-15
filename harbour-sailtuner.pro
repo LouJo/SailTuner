@@ -1,13 +1,15 @@
 QT += qml quick gui multimedia dbus
 TARGET = harbour-sailtuner
 
-CONFIG += c++11 qt link_pkgconfig sailfishapp sailfishapp_i18n sailfishapp_no_deploy_qml
+CONFIG += c++11 qt link_pkgconfig sailfishapp sailfishapp_no_deploy_qml
 
 DEFINES += TARGET=\""$(TARGET")\"
 
 ## see rpm/Makefile for installing libpulse and libaudioresource
 
 PKGCONFIG += libpulse-simple audioresource
+
+SAILFISHAPP_ICONS = 86x86 108x108 128x128 256x256
 
 RESOURCES += \
 	qml/sailfish.qrc \
