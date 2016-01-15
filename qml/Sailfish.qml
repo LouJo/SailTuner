@@ -66,6 +66,10 @@ ApplicationWindow {
 
 				PullDownMenu {
 					MenuItem {
+						text: qsTr("Apropos")
+						onClicked: pageStack.push(Qt.resolvedUrl("Apropos.qml"))
+					}
+					MenuItem {
 						text: qsTr("Configuration")
 						onClicked: {
 							var confpage = pageStack.push(Qt.resolvedUrl("ConfigurePageSailfish.qml"), { tuner: app.tuner })
@@ -119,6 +123,10 @@ ApplicationWindow {
 				interactive: !screen.toisepressed
 
 				PullDownMenu {
+					MenuItem {
+						text: qsTr("Apropos")
+						onClicked: pageStack.push(Qt.resolvedUrl("Apropos.qml"))
+					}
 					MenuItem {
 						text: qsTr("Configuration")
 						onClicked: {
