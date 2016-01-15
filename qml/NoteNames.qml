@@ -39,5 +39,5 @@ QtObject {
 	property int nb: notes_fr.length
 	property variant notes: notesTab[notes_style]
 
-	function noteName(note) { return notes[note]; }
+	function name(note) { return notes[note]; }
 }

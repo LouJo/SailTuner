@@ -10,6 +10,7 @@
 <file>ToiseFlickable.qml</file>
 <file>Led.qml</file>
 <file>ConfigurePageSailfish.qml</file>
+<file>CoverPageSailfish.qml</file>
 <file>Config.qml</file>
 <file>NoteNames.qml</file>
 <file>qmldir</file>

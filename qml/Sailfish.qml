@@ -132,11 +132,7 @@ ApplicationWindow {
 
 
 	cover: Component {
-		CoverBackground {
-			SimpleDisplay {
-				theme: Theme
-				tuner: app.tuner
-			}
+		CoverPageSailfish {
 		}
 	}
 
