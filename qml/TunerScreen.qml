@@ -31,6 +31,7 @@ Item {
 	property QtObject theme
 
 	signal toggleRun()
+	signal redraw()
 
 	anchors.fill: parent
 	property int h_margin: (height - meter.height - toise.height) / 3
@@ -190,5 +191,9 @@ Item {
 	MouseArea {
 		anchors.fill: parent
 		onClicked: toggleRun()
+	}
+
+	Component.onCompleted: {
+		redraw.connect(meter.redraw)
 	}
 }

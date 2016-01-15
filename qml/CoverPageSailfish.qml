@@ -29,12 +29,13 @@ CoverBackground {
 	id: cover
 
 	property QtObject tuner
+	property bool displayDeviation: true
 
 	Item {
 		anchors.top: parent.top
 		anchors.left: parent.left
 		anchors.right: parent.right
-		anchors.topMargin: parent.height / 12
+		anchors.topMargin: parent.height / 6
 
 		Label {
 			id: coverLabel
@@ -56,11 +57,18 @@ CoverBackground {
 			color: Theme.primaryColor
 			font.pixelSize: 35
 		}
-		Led {
+
+		Text {
+			id: coverDeviation
+			text: (tuner.deviation > 0 ? "+" : "") + (tuner.deviation * 101).toFixed(2) + "%"
+			visible: tuner.found && cover.displayDeviation
+
+			anchors.horizontalCenter: parent.horizontalCenter
 			anchors.top: coverNote.bottom
 			anchors.topMargin: Theme.paddingLarge
-			anchors.horizontalCenter: parent.horizontalCenter
-			led_color: Math.abs(tuner.deviation) <= 0.05 ? "green" : "red"
+
+			color: Theme.secondaryColor
+			font.pixelSize: 25
 		}
 	}
 }

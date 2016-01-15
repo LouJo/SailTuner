@@ -35,6 +35,7 @@ ApplicationWindow {
 
 	property int dbFontSize: 100
 	property QtObject tuner
+	property bool lastPagePlaying: false
 
 	ObjectSaver {
 		id: saver
@@ -84,6 +85,20 @@ ApplicationWindow {
 			}
 			onTunerRunningChanged: app.userRunning = tunerRunning
 
+			property bool isVisible: Qt.application.active && status == PageStatus.Active
+			property int countVisible: 0
+			onIsVisibleChanged: {
+				if (isVisible) {
+					// don't redraw the first time
+					if (countVisible > 0) screen.redraw()
+					countVisible++
+				}
+			}
+			onStatusChanged: {
+				if (status == PageStatus.Active) {
+					app.lastPagePlaying = false
+				}
+			}
 		}
 	}
 
@@ -125,7 +140,10 @@ ApplicationWindow {
 			onTunerPlayingChanged: app.userPlaying = tunerPlaying
 
 			onStatusChanged: {
-				if (status == PageStatus.Active) screen.update()
+				if (status == PageStatus.Active) {
+					app.lastPagePlaying = true
+					screen.update()
+				}
 			}
 		}
 	}
@@ -133,6 +151,8 @@ ApplicationWindow {
 
 	cover: Component {
 		CoverPageSailfish {
+			tuner: app.tuner
+			displayDeviation: !app.lastPagePlaying
 		}
 	}
 

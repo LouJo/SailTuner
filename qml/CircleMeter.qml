@@ -252,4 +252,9 @@ Item {
 	onLevelChanged: {
 		arrow.requestPaint()
 	}
+
+	function redraw() {
+		ellipse.requestPaint()
+		arrow.requestPaint()
+	}
 }
