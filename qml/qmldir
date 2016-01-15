@@ -1,1 +1,2 @@
 singleton Config Config.qml
+singleton NoteNames NoteNames.qml

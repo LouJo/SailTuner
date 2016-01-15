@@ -16,6 +16,7 @@
  */
 
 import QtQuick 2.0
+import "."
 
 /**
  * Main tuner screen
@@ -113,8 +114,8 @@ Item {
 			//octave: tuner.octave
 
 			onReleased: {
-				note = index % 12
-				octave = index / 12
+				note = index % NoteNames.nb
+				octave = index / NoteNames.nb
 				toise_octave.index = octave
 				// set octave and note atomically
 				tuner.setNoteOctave(note, octave)
@@ -178,7 +179,7 @@ Item {
 		toise.note = tuner.note
 		toise.octave = tuner.octave
 		toise_octave.index = tuner.octave
-		toise.index = tuner.note + 12 * tuner.octave
+		toise.index = tuner.note + NoteNames.nb * tuner.octave
 		toise.updateFlickable()
 		toise_octave.updateFlickable()
 		toise.flik_enable = true

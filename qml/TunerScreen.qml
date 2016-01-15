@@ -16,6 +16,7 @@
  */
 
 import QtQuick 2.0
+import "."
 
 /**
  * Main tuner screen
@@ -49,7 +50,7 @@ Item {
 		anchors.left: meter.left
 		anchors.topMargin: meter.width / 24 
 		anchors.leftMargin: anchors.topMargin
-		width: meter.width / 12
+		width: meter.width / NoteNames.nb
 		height: width
 		led_color: dev_is_ok ? led_green : led_red
 		on: tuner.found && (dev_is_ok || tuner.deviation < 0)
@@ -60,7 +61,7 @@ Item {
 		anchors.right: meter.right
 		anchors.topMargin: meter.width / 24 
 		anchors.rightMargin: anchors.topMargin
-		width: meter.width / 12
+		width: meter.width / NoteNames.nb
 		height: width
 		led_color: dev_is_ok ? led_green : led_red
 		on: tuner.found && (dev_is_ok || tuner.deviation > 0)

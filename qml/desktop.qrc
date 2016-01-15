@@ -11,6 +11,7 @@
 <file>ToiseFlickable.qml</file>
 <file>Led.qml</file>
 <file>Config.qml</file>
+<file>NoteNames.qml</file>
 <file>qmldir</file>
 </qresource>
 </RCC>

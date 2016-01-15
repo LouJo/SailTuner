@@ -31,22 +31,14 @@ ToiseFlickable {
 	property int note: 1
 	// octave
 	property int octave: 4
-	// en or fr
-	property int notes_style: Config.notes_style
-
-	property variant notes_fr: [
-		"do", "do#", "ré", "mib", "mi", "fa", "fa#", "sol", "sol#", "la", "sib", "si"]
-	property variant notes_en: [
-		"C", "C#", "D", "Eb", "E", "F", "F#", "G", "G#", "A", "Bb", "B"]
-	property variant notes: [notes_en, notes_fr]
 
 	// case colors
 	property color colorAltered: "#40888888"
 	property color colorNatural: "transparent"
 
 	// Toise parameters
-	index: note + notes_en.length * octave
-	marks: notes[notes_style]
+	index: note + NoteNames.nb * octave
+	marks: NoteNames.notes
 	nb_marks_displayed: width > 100 ? Math.min(nb_marks, width / theme.fontSizeLarge * 0.8) : 1
 
 	mark_color: function(note) {
@@ -59,12 +51,12 @@ ToiseFlickable {
 	}
 
 	// ToiseFlikcable parameters
-	min: notes_en.length * 0 // ut 0
-	max: notes_en.length * 9 - 1 // si 8
+	min: NoteNames.nb * 0 // ut 0
+	max: NoteNames.nb * 9 - 1 // si 8
 
 	onOctaveChanged: {
 		if (!flik_enable) return
-		index = note + notes_en.length * octave
+		index = note + NoteNames.nb * octave
 		updateFlickable()
 	}
 }
