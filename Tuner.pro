@@ -33,4 +33,4 @@ HEADERS += \
 RESOURCES += \
 	qml/desktop.qrc \
 	data/temperaments.qrc \
-	images/images.qrc
+	images/desktop/images.qrc
