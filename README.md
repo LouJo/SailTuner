@@ -14,7 +14,7 @@ The algorithm for fundamental frequency detection:
 
 - high-pass filter (10Hz)
 - zero-crossing detection with linear interpolation
-- pattern recognition from regions, with time based standart deviation
+- pattern recognition from regions, with time based standard deviation
 - octave filtering: drop a frequency if already a higher octave for same note in some conditions
 - post filter: wait few analyses to confirm or defect a note, and make a turning average for note deviation
 
