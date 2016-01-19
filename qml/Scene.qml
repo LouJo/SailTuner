@@ -26,7 +26,7 @@ Image {
 	width: 800
 	height: 400
 
-	source: "../images/bg_portrait.png"
+	source: "../images/desktop/bg_portrait.png"
 
 	DesktopTheme {
 		id: theme
@@ -47,10 +47,10 @@ Image {
 		function setNoteOctave(n, o) {}
 	}
 
-	PlayerScreen {
+	TunerScreen {
 		tuner: tuner
 		theme: theme
 
-		onTogglePlay: tuner.playing ^= true
+		//onTogglePlay: tuner.playing ^= true
 	}
 }
