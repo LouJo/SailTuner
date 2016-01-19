@@ -34,7 +34,10 @@ Rectangle {
 	}
 	ArrowOnly {
 		level: 10
-		lineWidth: 10
+		lineWidth: 14
+		r_arrow_base: 0.07
+		r_arrow_bottom: 0.07
+
 		anchors.fill: parent
 		theme: theme
 	}

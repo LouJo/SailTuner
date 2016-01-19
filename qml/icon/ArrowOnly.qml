@@ -22,7 +22,10 @@ import QtQuick 2.0
  */
 
 Item {
-	property double lineWidth: 6
+	property double lineWidth: 7
+	property double r_arrow_base: 0.08
+	property double r_arrow_bottom: 0.070
+
 	/// current level
 	property double level: 0.5 
 	/// minimum level
@@ -36,7 +39,6 @@ Item {
 	property double r_circle_min: 0.85
 	property double r_circle_max: 1
 
-	property double r_arrow_base: 0.05
 	property double _height: width / 2
 
 	property double amin: angle(min)
@@ -166,7 +168,7 @@ Item {
 		property double k: 0.82
 		property double angle: parent.angle(level)
 
-		property double r_base: 0.055
+		property double r_base: parent.r_arrow_bottom
 		property double r_circle_base: r_arrow_base * 0.6
 		property double k_head: 0.1 // arrow width factor of base
 		property double lref: width / 2
