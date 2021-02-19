@@ -40,7 +40,7 @@ Instrumental multi-temperament chromatic tuner
 # >> build pre
 # << build pre
 
-%qtc_qmake5 
+%qtc_qmake5 %{name}.pro
 
 %qtc_make %{?_smp_mflags}
 
