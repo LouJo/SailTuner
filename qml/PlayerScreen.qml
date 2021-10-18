@@ -69,7 +69,7 @@ Item {
 		anchors.horizontalCenter: parent.horizontalCenter
 		width: theme.iconSizeLarge
 		height: width
-		source: tuner.playing ? (theme.icon_play_large ? theme.icon_play_large : "image://theme/icon-l-play?" + theme.secondaryColor) : (theme.icon_pause_large ? theme.icon_pause_large : "image://theme/icon-l-pause?" + theme.secondaryColor)
+		source: tuner.playing ? (theme.icon_pause_large ? theme.icon_pause_large : "image://theme/icon-l-pause?" + theme.secondaryColor) : (theme.icon_play_large ? theme.icon_play_large : "image://theme/icon-l-play?" + theme.secondaryColor)
 	}
 
 	Item {
