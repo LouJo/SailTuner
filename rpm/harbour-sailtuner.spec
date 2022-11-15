@@ -25,6 +25,8 @@ BuildRequires:  pkgconfig(sailfishapp) >= 1.0.2
 BuildRequires:  pkgconfig(Qt5Core)
 BuildRequires:  pkgconfig(Qt5Qml)
 BuildRequires:  pkgconfig(Qt5Quick)
+BuildRequires:  pkgconfig(libpulse-simple)
+BuildRequires:  pkgconfig(audioresource)
 BuildRequires:  desktop-file-utils
 
 %description
@@ -33,28 +35,15 @@ Instrumental multi-temperament chromatic tuner
 %prep
 %setup -q -n %{name}-%{version}
 
-# >> setup
-# << setup
-
 %build
-# >> build pre
-# << build pre
 
 %qtc_qmake5 %{name}.pro
 
 %qtc_make %{?_smp_mflags}
 
-# >> build post
-# << build post
-
 %install
 rm -rf %{buildroot}
-# >> install pre
-# << install pre
 %qmake5_install
-
-# >> install post
-# << install post
 
 desktop-file-install --delete-original       \
   --dir %{buildroot}%{_datadir}/applications             \
@@ -63,11 +52,8 @@ desktop-file-install --delete-original       \
 %files
 %defattr(-,root,root,-)
 %{_bindir}
-#%{_datadir}/%{name}
 %{_datadir}/applications/%{name}.desktop
 %attr(644,-,-) %{_datadir}/icons/hicolor/86x86/apps/%{name}.png
 %attr(644,-,-) %{_datadir}/icons/hicolor/108x108/apps/%{name}.png
 %attr(644,-,-) %{_datadir}/icons/hicolor/128x128/apps/%{name}.png
 %attr(644,-,-) %{_datadir}/icons/hicolor/256x256/apps/%{name}.png
-# >> files
-# << files
