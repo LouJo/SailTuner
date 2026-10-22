@@ -41,7 +41,7 @@ Page {
 			Label {
 				anchors.horizontalCenter: parent.horizontalCenter
 				font.pixelSize: Theme.fontSizeSmall
-				text: "version 0.1.1"
+                text: "version 0.2.0"
 			}
 
 			SectionHeader {
@@ -59,7 +59,18 @@ Page {
 				anchors.horizontalCenter: parent.horizontalCenter
 				font.pixelSize: Theme.fontSizeSmall
 				text: "01-2016"
-			}
+            }
+            Label {
+                anchors.horizontalCenter: parent.horizontalCenter
+                font.pixelSize: Theme.fontSizeSmall
+                text: "Mark Washeim"
+            }
+            Label {
+                anchors.horizontalCenter: parent.horizontalCenter
+                font.pixelSize: Theme.fontSizeSmall
+                text: "10-2026"
+            }
+
 			Label {
 				anchors.horizontalCenter: parent.horizontalCenter
 				font.pixelSize: Theme.fontSizeSmall

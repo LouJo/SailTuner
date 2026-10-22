@@ -5,8 +5,6 @@ CONFIG += c++11 debug link_pkgconfig
 
 DEFINES += TARGET=\""$(TARGET")\"
 
-PKGCONFIG += libpulse-simple
-
 SOURCES += \
 	src/desktop.cpp \
 	src/ObjectSaver.cpp \

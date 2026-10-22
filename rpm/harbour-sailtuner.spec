@@ -12,8 +12,9 @@ Name:       harbour-sailtuner
 %{!?qtc_qmake5:%define qtc_qmake5 %qmake5}
 %{!?qtc_make:%define qtc_make make}
 %{?qtc_builddir:%define _builddir %qtc_builddir}
+
 Summary:    Chromatic tuner
-Version:    0.1
+Version:    0.2.0
 Release:    1
 Group:      Qt/Qt
 License:    GPL
@@ -25,36 +26,46 @@ BuildRequires:  pkgconfig(sailfishapp) >= 1.0.2
 BuildRequires:  pkgconfig(Qt5Core)
 BuildRequires:  pkgconfig(Qt5Qml)
 BuildRequires:  pkgconfig(Qt5Quick)
+BuildRequires:  pkgconfig(Qt5DBus)
+BuildRequires:  pkgconfig(Qt5Multimedia)
+BuildRequires:  pkgconfig(audioresource)
 BuildRequires:  desktop-file-utils
+BuildRequires:  qt5-qttools-linguist
 
 %description
 Instrumental multi-temperament chromatic tuner
+%if "%{?vendor}" == "chum"
+PackageName: SailTuner
+Type: desktop-application
+Categories:
+ - Audio
+PackagerName: Mark Washeim (poetaster)
+Custom:
+ - Repo: https://github.com/poetaster/harbour-sailtuner
+PackageIcon: https://raw.githubusercontent.com/poetaster/SailTuner/master/icons/256x256/harbour-sailtuner.png
+Url:
+ - Bugtracker: https://github.com/poetaster/SailTuner/issues
+Screenshots:
+ - https://raw.githubusercontent.com/poetaster/SailTuner/master/images/screenshots/20160115211525.png
+ - https://raw.githubusercontent.com/poetaster/SailTuner/master/images/screenshots/20160115211610.png
+ - https://raw.githubusercontent.com/poetaster/SailTuner/master/images/screenshots/20160115211636.png
+Links:
+  Homepage: https://github.com/poetaster/SailTuner
+  Bugtracker: https://github.com/poetaster/SailTuner/issues
+%endif
 
 %prep
 %setup -q -n %{name}-%{version}
 
-# >> setup
-# << setup
-
 %build
-# >> build pre
-# << build pre
 
 %qtc_qmake5 %{name}.pro
 
 %qtc_make %{?_smp_mflags}
 
-# >> build post
-# << build post
-
 %install
 rm -rf %{buildroot}
-# >> install pre
-# << install pre
 %qmake5_install
-
-# >> install post
-# << install post
 
 desktop-file-install --delete-original       \
   --dir %{buildroot}%{_datadir}/applications             \
@@ -63,11 +74,9 @@ desktop-file-install --delete-original       \
 %files
 %defattr(-,root,root,-)
 %{_bindir}
-#%{_datadir}/%{name}
 %{_datadir}/applications/%{name}.desktop
 %attr(644,-,-) %{_datadir}/icons/hicolor/86x86/apps/%{name}.png
 %attr(644,-,-) %{_datadir}/icons/hicolor/108x108/apps/%{name}.png
 %attr(644,-,-) %{_datadir}/icons/hicolor/128x128/apps/%{name}.png
 %attr(644,-,-) %{_datadir}/icons/hicolor/256x256/apps/%{name}.png
-# >> files
-# << files
+

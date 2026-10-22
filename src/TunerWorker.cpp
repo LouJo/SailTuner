@@ -1,5 +1,9 @@
-/* Copyright 2016 (C) Louis-Joseph Fournier 
+/*
+ * Copyright 2016 (C) Louis-Joseph Fournier
+ * Copyright 2026 (C) Mark Washeim
+ *
  * louisjoseph.fournier@gmail.com
+ * blueprint@poetaster.de
  *
  * This file is part of SailTuner.
  *
@@ -18,22 +22,40 @@
 #include <QDBusConnection>
 #include <QDBusInterface>
 
+#include <algorithm>
 #include <iostream>
-#include <fstream>
 #include <stdint.h>
-
-extern "C" {
-#include <pulse/simple.h>
-}
 
 #include "audio/FreqPlayer.hpp"
 #include "TunerWorker.hpp"
 
-#define name_(x) #x
-#define name(x) name_(x)
-#define NAME name(TARGET)
-
 using namespace std;
+
+/// linear resampling of a mono 16-bit buffer; used when the device
+/// negotiates a rate different from PitchDetection::rate
+static QVector<qint16> resampleLinear(const qint16 *src, int n, int fromHz, int toHz)
+{
+	QVector<qint16> out;
+	if (n <= 0) return out;
+	if (fromHz == toHz) {
+		out.resize(n);
+		std::copy(src, src + n, out.data());
+		return out;
+	}
+	const double step = double(fromHz) / double(toHz);
+	const int out_n = int(double(n) * step);
+	out.reserve(out_n);
+	double pos = 0;
+	for (int i = 0; i < out_n; ++i) {
+		const int idx = int(pos);
+		if (idx >= n - 1)
+			out.append(src[n - 1]);
+		else
+			out.append(qint16(int(src[idx] + (src[idx + 1] - src[idx]) * (pos - idx))));
+		pos += step;
+	}
+	return out;
+}
 
 /// file name to record audio
 
@@ -62,9 +84,22 @@ TunerWorker::TunerWorker() :
 	la_to_update(0),
 	temperament_to_update(0), // update the first time in every cases
 	note_to_update(-1),
-	octave_to_update(-1)
+	octave_to_update(-1),
+	pitch(nullptr),
+	player(nullptr),
+	record_file(nullptr),
+	audio_in(nullptr),
+	in_rate(0),
+	bytes_seen(0),
+	tried_preferred_format(false),
+	audio_out(nullptr),
+	out_rate(0),
+	blank_asserted(false),
+	pump(nullptr),
+	watchdog(nullptr),
+	loop(nullptr)
 {
-	//qRegisterMetaType<PitchDetection::PitchResult>("PitchDetection::PitchResult");
+	scratch.resize(kChunk);
 }
 
 TunerWorker::~TunerWorker()
@@ -76,7 +111,6 @@ void TunerWorker::Start()
 	cerr << __func__ << endl;
 	mutex.lock();
 	running = true;
-	condition.wakeOne();
 	mutex.unlock();
 }
 
@@ -96,7 +130,6 @@ void TunerWorker::SetPlaying(bool p)
 	if (p) {
 		playing = p;
 		play_stop_counter = 0;
-		condition.wakeOne();
 	}
 	else {
 		// stop after a frame
@@ -107,10 +140,14 @@ void TunerWorker::SetPlaying(bool p)
 
 void TunerWorker::Quit()
 {
+	QEventLoop *l = nullptr;
 	mutex.lock();
 	quit = true;
-	condition.wakeOne();
+	l = loop;
 	mutex.unlock();
+
+	// deliver the quit to the event loop running in the worker thread
+	if (l) QMetaObject::invokeMethod(l, "quit", Qt::QueuedConnection);
 }
 
 void TunerWorker::SetLa(double la)
@@ -153,190 +190,410 @@ void TunerWorker::Entry()
 {
 	cerr << __func__ << endl;
 
-	int nbSamplePreventBlanking = nbSecPreventBlanking * PitchDetection::rate;
-	int nb_sample_running = 0;
+	// exit if already asked to quit
+	{
+		QMutexLocker lock(&mutex);
+		if (quit) return;
+	}
 
-	int16_t *buffer = new int16_t[nbSampleBuffer];
+	pitch = new PitchDetection();
+	emit temperamentListUpdated(pitch->GetTemperamentList());
 
-	PitchDetection::PitchResult result;
+	player = new FreqPlayer<int16_t>(PitchDetection::rate);
 
-	ofstream *file = NULL;
-	if (filename_record) file = new ofstream(filename_record);
-
-	PitchDetection *pitchDetection = new PitchDetection();
-	emit temperamentListUpdated(pitchDetection->GetTemperamentList());
-
-	FreqPlayer<int16_t> *player = new FreqPlayer<int16_t>(PitchDetection::rate);
-
-	// pulseaudio
-	pa_simple *p_record = NULL, *p_play = NULL;
-	pa_sample_spec p_spec;
-
-	p_spec.format = PA_SAMPLE_S16NE;
-	p_spec.channels = 1;
-	p_spec.rate = PitchDetection::rate;
+	if (filename_record) record_file = new ofstream(filename_record);
 
 	// prevent lpm if running on startup
-	if (running || playing) blank_prevent(true);
+	bool started_active = false;
+	{
+		QMutexLocker lock(&mutex);
+		started_active = running || playing;
+	}
+	if (started_active) {
+		blank_asserted = true;
+		blank_timer.start();
+		blank_prevent(true);
+	}
 
-	while (1) {
+    // idle time is spent in the event loop,
+    // the pump timer and the readyRead() notifications wake it
+	QEventLoop l;
+	{
+		QMutexLocker lock(&mutex);
+		if (quit) {
+			delete player;
+			delete pitch;
+			if (record_file) {
+				record_file->close();
+				delete record_file;
+			}
+			return;
+		}
+		loop = &l;
+	}
 
-		mutex.lock();
+	// create the timers here: a QTimer must be started on its own thread,
+    // and Entry() runs on the worker thread
+
+	pump = new QTimer(this);
+	pump->setInterval(kPumpMs);
+	connect(pump, &QTimer::timeout, this, &TunerWorker::pumpAudio);
+	watchdog = new QTimer(this);
+	watchdog->setSingleShot(true);
+	watchdog->setInterval(kWatchMs);
+	connect(watchdog, &QTimer::timeout, this, &TunerWorker::checkForSilence);
+
+	pump->start();
+	l.exec();
+
+	{
+		QMutexLocker lock(&mutex);
+		loop = nullptr;
+	}
+	pump->stop();
+
+	closeRecord();
+	closePlayback();
+
+	delete player;
+	delete pitch;
+
+	if (record_file) {
+		record_file->close();
+		delete record_file;
+	}
+	blank_prevent(false);
+}
+
+/// pump the audio devices: apply config, read the microphone, analyse,
+/// play the reference tone, and keep the screen from blanking
+void TunerWorker::pumpAudio()
+{
+	bool do_run = false, do_play = false;
+	{
+		QMutexLocker lock(&mutex);
 		// stop playing after a frame
 		if (play_stop_counter >= 2) playing = false;
 
-		// free pulseaudio if not running
-		if (!running && p_record) {
-			pa_simple_free(p_record);
-			p_record = nullptr;
-		}
-		// free playing if record running, after a delay
-		if (play_stop_counter >= 10 && p_play) {
-			pa_simple_free(p_play);
-			p_play = nullptr;
-		}
-
-		// wait for running
-		if (!running && !playing) {
-			blank_prevent(false);
-			bool waked;
-			while (!running && !playing && !quit) {
-				waked = condition.wait(&mutex, p_play ? 1000 : ULONG_MAX);
-				// free playing now
-				if (!waked && p_play) {
-					pa_simple_free(p_play);
-					p_play = nullptr;
-				}
-			}
-			cerr << "wake-up" << endl;
-			nb_sample_running = 0;
-			if (!quit) blank_prevent(true);
-		}
-		if (quit) {
-			mutex.unlock();
-			break;
-		}
-
 		// update config
 		if (la_to_update) {
-			pitchDetection->SetLa(la_to_update);
+			pitch->SetLa(la_to_update);
 			la_to_update = 0;
 		}
 		if (temperament_to_update != -1) {
-			pitchDetection->SetTemperament(temperament_to_update);
+			pitch->SetTemperament(temperament_to_update);
 			temperament_to_update = -1;
 		}
 		if (note_to_update != -1) {
 			result.note = note_to_update;
 			note_to_update = -1;
-			player->SetFreq(pitchDetection->GetNoteFreq(result.note, result.octave));
+			player->SetFreq(pitch->GetNoteFreq(result.note, result.octave));
 		}
 		if (octave_to_update != -1) {
 			result.octave = octave_to_update;
 			octave_to_update = -1;
-			player->SetFreq(pitchDetection->GetNoteFreq(result.note, result.octave));
+			player->SetFreq(pitch->GetNoteFreq(result.note, result.octave));
 		}
-		bool m_running = running;
-		bool m_playing = playing;
-		mutex.unlock();
 
-		if (m_running ) {
-			// tuner detection running
+		do_run = running;
+		do_play = playing;
+	}
 
-			if (!p_record) {
-				// start pulseaudio if stopped
-				p_record = pa_simple_new(
-						NULL,
-						NAME,
-						PA_STREAM_RECORD,
-						NULL,
-						"Tuner record",
-						&p_spec,
-						NULL,
-						NULL,
-						NULL
-						);
-				// reset detection
-				pitchDetection->Reset();
-				result.found = false;
-				emit resultUpdated(result);
+	// ---------------- capture ----------------
+	if (do_run) {
+		// reopen if the stream is gone or its QIODevice was destroyed
+		if (!audio_in || !in_source) {
+			if (audio_in)
+				closeRecord();
+			// open failed before: retry at most once per kRetryMs
+			if (!record_retry.isValid() || record_retry.elapsed() >= kRetryMs) {
+				record_retry.start();
+				openRecord(tried_preferred_format);
+			}
+		}
+
+		if (in_source) {
+            // drain whatever is available; no bytesAvailable() check,
+			int total = 0;
+			while (total < kChunk) {
+				const qint64 r = in_source->read(reinterpret_cast <char *> (scratch.data() + total),
+						qint64(kChunk - total) * qint64(sizeof(qint16)));
+				if (r <= 0) break;
+				total += int(r / sizeof(qint16));
 			}
 
-			// get audio data
-			int size = pa_simple_read(p_record, (void*) buffer, nbSampleBuffer << 1, NULL);
-			if (size < 0) {
-				cerr << "audio read failed " << size << endl;
-				continue;
+			if (total > 0) {
+				bytes_seen += total;
+				watchdog->start();
+
+				const qint16 *data = scratch.constData();
+				int n = total;
+				if (in_rate != PitchDetection::rate) {
+					// the device negotiated another rate: resample
+					buf16 = resampleLinear(scratch.constData(), total, in_rate, PitchDetection::rate);
+					data = buf16.constData();
+					n = buf16.size();
+				}
+
+				// record in file if needed
+				if (record_file) record_file->write((const char *) data, n * int(sizeof(qint16)));
+
+				pitch->AudioAnalyse(data, n);
+
+				PitchDetection::PitchResult res;
+				if (pitch->GetResultUpdated(res)) {
+					if (res.found) cout << Scale::NoteName(res.note) << " " << res.frequency << endl;
+					result = res;
+					emit resultUpdated(res);
+				}
 			}
-			//cerr << "read " << nb_sample_running << endl;
+		}
+	}
+	else if (audio_in) {
+		// not running anymore: release the microphone
+		tried_preferred_format = false;
+		closeRecord();
+	}
 
-			// record in file is needed
-			if (file) file->write((char*) buffer, nbSampleBuffer << 1);
-
-			pitchDetection->AudioAnalyse(buffer, nbSampleBuffer);
-
-			if (pitchDetection->GetResultUpdated(result)) {
-				if (result.found) cout << Scale::NoteName(result.note) << " " << result.frequency << endl;
-				emit resultUpdated(result);
+	// ---------------- playback ----------------
+	bool close_play = false;
+	if (do_play) {
+		// reopen if the stream is gone or its QIODevice was destroyed
+		if (!audio_out || !out_source) {
+			if (audio_out)
+				closePlayback();
+			if (!play_retry.isValid() || play_retry.elapsed() >= kRetryMs) {
+				play_retry.start();
+				openPlayback();
 			}
-		} // running
+		}
 
-		if (m_playing) {
-			// play
-			if (!p_play) {
-				// start pulseaudio if stopped
-				p_play = pa_simple_new(
-						NULL,
-						NAME,
-						PA_STREAM_PLAYBACK,
-						NULL,
-						"Tuner playback",
-						&p_spec,
-						NULL,
-						NULL,
-						NULL
-						);
-
-				// update frequency to update from previous tuner results
-				player->Reset();
-				player->SetFreq(pitchDetection->GetNoteFreq(result.note, result.octave));
+		if (out_source) {
+			int16_t buf[nbSampleBuffer];
+			int stop_counter;
+			{
+				QMutexLocker lock(&mutex);
+				stop_counter = play_stop_counter;
+				if (stop_counter > 0) play_stop_counter = stop_counter + 1;
 			}
 
-			const int stop_counter = play_stop_counter;
+			player->WriteAudio(buf, nbSampleBuffer, stop_counter > 0);
 
-			player->WriteAudio(buffer, nbSampleBuffer, stop_counter > 0);
-			if (pa_simple_write(p_play, buffer, nbSampleBuffer << 1, nullptr) < 0) {
+			const qint16 *data = buf;
+			int n = nbSampleBuffer;
+			QVector<qint16> tmp;
+			if (out_rate != PitchDetection::rate) {
+				// the device negotiated another rate: resample
+				tmp = resampleLinear(buf, nbSampleBuffer, PitchDetection::rate, out_rate);
+				data = tmp.constData();
+				n = tmp.size();
+			}
+			if (out_source->write(const_cast <char *> (reinterpret_cast <const char *> (data)),
+						qint64(n) * qint64(sizeof(qint16))) < 0) {
 				cerr << "audio write failed" << endl;
 			}
-
-			if (stop_counter) play_stop_counter = stop_counter + 1;
-
-		} // playing
-		else {
-			// increment if record running
-			play_stop_counter++;
 		}
+	}
+	else {
+		// keep counting until the stream is released
+		QMutexLocker lock(&mutex);
+		play_stop_counter++;
+		close_play = (play_stop_counter >= 10) && (audio_out != nullptr);
+	}
+	if (close_play) closePlayback();
 
-		// prevent screen blanking
-		nb_sample_running += nbSampleBuffer;
-		if (nb_sample_running >= nbSamplePreventBlanking && (running || playing)) {
-			nb_sample_running = 0;
+	// ---------------- screen blanking ----------------
+	if (do_run || do_play) {
+		if (!blank_asserted) {
+			blank_asserted = true;
+			blank_timer.start();
+			blank_prevent(true);
+		}
+		else if (blank_timer.elapsed() >= qint64(nbSecPreventBlanking) * 1000) {
+			blank_timer.restart();
 			blank_prevent(true);
 		}
 	}
-
-	if (p_record) pa_simple_free(p_record);
-	if (p_play) pa_simple_free(p_play);
-
-	delete player;
-	delete pitchDetection;
-	delete buffer;
-
-	if (file) {
-		file->close();
-		delete file;
+	else if (blank_asserted) {
+		blank_asserted = false;
+		blank_prevent(false);
 	}
-	blank_prevent(false);
+}
+
+/// open the capture stream, negotiating the format with the device
+bool TunerWorker::openRecord(bool preferred)
+{
+	const QAudioDeviceInfo device = QAudioDeviceInfo::defaultInputDevice();
+	if (device.isNull()) {
+		cerr << "no input device" << endl;
+		return false;
+	}
+
+	QAudioFormat format;
+	if (preferred) {
+		// second attempt: stop arguing with the device and take what it likes
+		format = device.preferredFormat();
+	}
+	else {
+		format.setSampleRate(PitchDetection::rate);
+		format.setChannelCount(1);
+		format.setSampleSize(16);
+		format.setCodec(QStringLiteral("audio/pcm"));
+		format.setByteOrder(QAudioFormat::LittleEndian);
+		format.setSampleType(QAudioFormat::SignedInt);
+		if (!device.isFormatSupported(format))
+			format = device.nearestFormat(format);
+	}
+
+	// we only know how to handle mono 16-bit signed
+	if (format.sampleSize() != 16
+			|| format.sampleType() != QAudioFormat::SignedInt
+			|| format.channelCount() != 1) {
+		cerr << "unsupported input format" << endl;
+		return false;
+	}
+
+	// whatever rate we end up with is what we divide by
+	in_rate = format.sampleRate();
+
+	audio_in = new QAudioInput(device, format, this);
+	connect(audio_in, &QAudioInput::stateChanged, this, &TunerWorker::recordStateChanged);
+
+	in_source = audio_in->start();
+	if (!in_source) {
+		cerr << "could not open microphone" << endl;
+		audio_in->deleteLater();
+		audio_in = nullptr;
+		return false;
+	}
+
+	// readyRead() is a hint only, the timer is the real mechanism
+	connect(in_source.data(), &QIODevice::readyRead, this, &TunerWorker::pumpAudio);
+
+	// reset detection, as when the old code started the pulseaudio stream
+	{
+		QMutexLocker lock(&mutex);
+		pitch->Reset();
+		result.found = false;
+		emit resultUpdated(result);
+	}
+
+	bytes_seen = 0;
+	watchdog->start();
+
+	cerr << "capturing " << in_rate << " Hz" << endl;
+	return true;
+}
+
+void TunerWorker::closeRecord()
+{
+	watchdog->stop();
+	in_source.clear();
+	if (audio_in) {
+		audio_in->stop();
+		delete audio_in;
+		audio_in = nullptr;
+	}
+	bytes_seen = 0;
+}
+
+void TunerWorker::recordStateChanged(QAudio::State state)
+{
+	if (!audio_in)
+		return;
+
+	if (state == QAudio::StoppedState && audio_in->error() != QAudio::NoError)
+		cerr << "record stopped with error " << audio_in->error() << endl;
+
+	// do NOT drop the stream here: some backends pass through
+	// Stopped/Idle states asynchronously right after start(). A dead
+	// stream is handled by the pump (the QIODevice goes away, the
+	// stream is reopened) and by the watchdog (no bytes arrive).
+}
+
+void TunerWorker::checkForSilence()
+{
+	if (bytes_seen > 0)
+		return;
+
+	if (!tried_preferred_format) {
+		tried_preferred_format = true;
+		cerr << "no audio after " << kWatchMs << " ms, retrying with the device format" << endl;
+		closeRecord();
+		if (openRecord(true))
+			watchdog->start();
+		return;
+	}
+
+	cerr << "still no audio from the microphone, check the audio sources" << endl;
+}
+
+/// open the playback stream
+bool TunerWorker::openPlayback()
+{
+	const QAudioDeviceInfo device = QAudioDeviceInfo::defaultOutputDevice();
+	if (device.isNull()) {
+		cerr << "no output device" << endl;
+		return false;
+	}
+
+	QAudioFormat format;
+	format.setSampleRate(PitchDetection::rate);
+	format.setChannelCount(1);
+	format.setSampleSize(16);
+	format.setCodec(QStringLiteral("audio/pcm"));
+	format.setByteOrder(QAudioFormat::LittleEndian);
+	format.setSampleType(QAudioFormat::SignedInt);
+	if (!device.isFormatSupported(format))
+		format = device.nearestFormat(format);
+
+	if (format.sampleSize() != 16
+			|| format.sampleType() != QAudioFormat::SignedInt
+			|| format.channelCount() != 1) {
+		cerr << "unsupported output format" << endl;
+		return false;
+	}
+
+	out_rate = format.sampleRate();
+
+	audio_out = new QAudioOutput(format, this);
+	connect(audio_out, &QAudioOutput::stateChanged, this, &TunerWorker::playStateChanged);
+
+	out_source = audio_out->start();
+	if (!out_source) {
+		cerr << "could not open playback" << endl;
+		audio_out->deleteLater();
+		audio_out = nullptr;
+		return false;
+	}
+
+	// update frequency to update from previous tuner results
+	player->Reset();
+	player->SetFreq(pitch->GetNoteFreq(result.note, result.octave));
+
+	cerr << "playing " << out_rate << " Hz" << endl;
+	return true;
+}
+
+void TunerWorker::closePlayback()
+{
+	if (audio_out) {
+		audio_out->stop();
+		delete audio_out;
+		audio_out = nullptr;
+	}
+	out_source.clear();
+}
+
+void TunerWorker::playStateChanged(QAudio::State state)
+{
+	if (!audio_out)
+		return;
+
+	if (state == QAudio::StoppedState && audio_out->error() != QAudio::NoError)
+		cerr << "playback stopped with error " << audio_out->error() << endl;
+
+	// like recordStateChanged: a dead stream is handled by the pump
 }
 
 /// Set a filename before instanciation to record raw audio stream

@@ -1,5 +1,9 @@
-/* Copyright 2016 (C) Louis-Joseph Fournier 
+/*
+ * Copyright 2016 (C) Louis-Joseph Fournier
+ * Copyright 2026 (C) Mark Washeim
+ *
  * louisjoseph.fournier@gmail.com
+ * blueprint@poetaster.de
  *
  * This file is part of SailTuner.
  *
@@ -241,14 +245,13 @@ Item {
 		}
 	}
 
-/*
 	Behavior on level {
 		NumberAnimation {
-			duration: 50
+			duration: 300
 			easing.amplitude: max - min
 		}
 	}
-	*/
+
 	onLevelChanged: {
 		arrow.requestPaint()
 	}
